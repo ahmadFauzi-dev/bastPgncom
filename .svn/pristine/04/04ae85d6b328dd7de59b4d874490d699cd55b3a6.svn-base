@@ -1,0 +1,53 @@
+Ext.define('simpel.surat_masuk.gridperintahdisposisi' ,{
+	extend: 'Ext.grid.Panel',
+	initComponent	: function()
+	{
+		var dataselect;
+		var pageId = '3317';
+		var msclass = Ext.create('master.global.geteventmenu'); 
+		var model = msclass.getmodel("fn_getdatamastertype('TOD47')");
+		var columns = msclass.getcolumn("fn_getdatamastertype('TOD47')");
+		//var winss;
+		var filter = [];
+		var store =  msclass.getstore(model,"fn_getdatamastertype('TOD47')",filter);
+		store.getProxy().extraParams = {
+							view :"fn_getdatamastertype('TOD47')",
+							limit : "All"
+						};
+		store.load();
+		
+		var coldisplay = columns;
+					//coldisplay[0].hidden = true;//row_id
+					coldisplay[1].hidden = true;
+					coldisplay[2].hidden = true;
+					coldisplay[3] = { 	
+							text : 'Nama',
+							width:350,
+							dataIndex	: columns[3].dataIndex
+					}
+					coldisplay[4].hidden = true;
+					coldisplay[5].hidden = true;
+					
+					
+					
+		Ext.apply(this, {
+				//title	: 'Email Template',
+				store		: store,
+				multiSelect	: true,
+				selType		: 'checkboxmodel',
+				fit		: true,
+				layout : 'fit',
+				height : 200,
+				id			: 'gridperintahdisposisi'+pageId,
+				columns		: columns,
+				listeners	: {
+					itemdblclick:function(model, record, index, eOpts)
+					{
+						//record.data.rowid;
+						//console.log(record.data);
+					}
+				}
+			});
+			this.callParent(arguments);
+	}
+});

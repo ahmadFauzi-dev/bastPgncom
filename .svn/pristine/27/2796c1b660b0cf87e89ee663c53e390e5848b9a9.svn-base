@@ -1,0 +1,62 @@
+function apps(name, iconCls) {
+     
+    var formpenyfinalrtpk = Ext.create('analisa.rtpk.view.formpenyfinalrtpk');
+    var gridpenyfinalrtpk = Ext.create('analisa.rtpk.view.gridpenyfinalrtpk');	
+    
+	
+    var tabPanel = Ext.getCmp('contentcenter');
+	tabPanel.items.each(function(c){
+		if (c.title != 'Home') {
+			tabPanel.remove(c);
+		}
+	});
+    var items = tabPanel.items.items;
+    var exist = false;
+    // for (var i = 0; i < items.length; i++) {
+        // if (items[i].id == '2') {			
+            // tabPanel.setActiveTab('2');
+            // exist = true;
+        // }
+    // }
+    if (!exist) {
+        // Ext.getCmp('contentcenter')
+		tabPanel.add({
+            title: name,
+            id: '566',
+            xtype: 'panel',
+            iconCls: iconCls,
+            closable: true,
+            layout: 'border',
+            // overflowY	: 'scroll',
+            defaults: {
+                collapsible: true,
+                split: true,
+                //bodyStyle: 'padding:5px'
+            },
+            // bodyPadding: '5 5 0',
+            items: [{
+                xtype: 'panel',
+                title: 'Form Search',
+                flex: 1,
+				id  : 'searchpenyfinalrtpkform',
+                region: 'west',
+                // layout 		: 'fit',
+                bodyStyle: 'padding:5px',
+                //width			: 600,
+                // margins		: '10',
+                items: formpenyfinalrtpk
+                //items			: []
+            }, {
+                xtype: 'tabpanel',
+                flex: 3,
+				id : 'TabAsikAja',
+                collapsible: false,	
+                region: 'center',
+				activeTab	: 0,				
+				fit		: true,							
+                items: [ gridpenyfinalrtpk ]
+            }]
+        });
+        tabPanel.setActiveTab('566');
+    }
+}

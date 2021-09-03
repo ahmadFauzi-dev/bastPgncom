@@ -1,0 +1,93 @@
+function apps(name, iconCls) {
+   
+    var formkelrtpk = Ext.create('analisa.rtpk.view.formkelrtpk');
+	var gridkeldatartpk = Ext.create('analisa.rtpk.view.gridkelrtpk');
+	var griddetaildatartpk = Ext.create('analisa.rtpk.view.griddatadetailrtpk');
+	
+    var tabPanel = Ext.getCmp('contentcenter');
+	tabPanel.items.each(function(c){
+		if (c.title != 'Home') {
+			tabPanel.remove(c);
+		}
+	});
+    var items = tabPanel.items.items;
+    var exist = false;
+    if (!exist) {
+		tabPanel.add({
+            title: name,
+            id: '333',
+            xtype: 'panel',
+            iconCls: iconCls,
+            closable: true,
+            layout: 'border',
+            // overflowY	: 'scroll',
+            defaults: {
+                collapsible: true,
+                split: true,
+                //bodyStyle: 'padding:5px'
+            },
+            // bodyPadding: '5 5 0',
+            items: [{
+                xtype: 'panel',
+                title: 'Form Search',
+                flex: 1,
+				id : 'searchformkelrtpk',
+                region: 'west',
+                // layout 		: 'fit',
+                bodyStyle: 'padding:5px',
+                //width			: 600,
+                // margins		: '10',
+                items: formkelrtpk
+                //items			: []
+            }, {
+                xtype: 'tabpanel',
+                flex: 3,
+				id : 'tabamr',
+                collapsible: false,				
+                region: 'center',
+				activeTab	: 0,				
+				fit		: true,							
+				items	: [{
+					xtype	: 'panel',
+					title  : 'Status Kelengkapan Data Non AMR',
+					frame: true,	
+					iconCls 	: 'application_view_gallery',
+					layout: 'border',
+					defaults: {
+						collapsible: true,
+						split: true,
+						//bodyStyle: 'padding:5px'
+					},
+					items	: [{
+						xtype : 'panel',
+						title : 'Kelengkapan Data',
+						frame	: true,
+						region : 'center',
+						layout: 'fit',
+						collapsible: false,
+						flex: 2,		
+						items	: gridkeldatartpk,
+						// autoScroll : true,
+						border: false
+						//items: gridkelData
+						
+					},
+					{
+					
+						xtype : 'panel',					
+						autoScroll : true,
+						region : 'south',
+						frame	: true,
+						border	: false,					
+						title : 'Detail Status Data',					
+						layout: 'fit',					
+						flex: 3,
+						items : griddetaildatartpk
+					
+					}]
+				}]
+            }]
+        });
+        tabPanel.setActiveTab('333');
+    }
+}

@@ -1,0 +1,74 @@
+Ext.define('analisa.nonamr.view.gridanomalistatus' ,{
+	extend: 'Ext.grid.Panel', 
+	initComponent	: function()
+	{
+		Ext.define('modelGridAnomaliDetail',{
+			extend	: 'Ext.data.Model',
+			fields	: ['id_pel','tanggal','alertdescription','alertname','alertalgoritma','status']
+		});	
+
+		var storeGridAnomaliDetail = Ext.create('Ext.data.JsonStore',{
+			model	: 'modelGridAnomaliDetail',
+			storeId: 'detailAnomaliStore',
+			proxy: {
+				type: 'pgascomProxy',
+				pageParam: false, 
+				startParam: false, 
+				limitParam: false,			
+				url: base_url+'analisa/showalertdailydetail',
+				reader: {
+					type: 'json',				
+					root: 'data'
+				}			
+			}
+		});
+		
+		
+		Ext.apply(this, {	
+			loadMask: true, 
+			columnLines: true, 
+			store	: storeGridAnomaliDetail,
+			id		: 'gridAnomaliStatus',			
+			columns		: [
+					Ext.create('Ext.grid.RowNumberer',
+					{
+						header: 'No', 
+						width: 40
+					}
+					),
+					{	
+						dataIndex : 'alertname',
+						text : 'Alert',
+						flex: 1,
+						renderer:function(value, metaData, record, row, col, store, gridView)
+						{
+							metaData.tdAttr= 'data-qtip="'+value+'"';
+							return value;
+						}
+					},
+					{	
+						dataIndex : 'alertdescription',
+						text : 'Description',
+						flex: 3,
+						renderer:function(value, metaData, record, row, col, store, gridView)
+						{
+							metaData.tdAttr= 'data-qtip="'+value+'"';
+							return value;
+						}					
+					},	
+					{	
+						dataIndex : 'alertalgoritma',
+						text : 'Algoritma',
+						flex: 2,
+						renderer:function(value, metaData, record, row, col, store, gridView)
+						{
+							metaData.tdAttr= 'data-qtip="'+value+'"';
+							return value;
+						}
+					}
+			]	
+		});
+		
+		this.callParent(arguments);
+	}
+});

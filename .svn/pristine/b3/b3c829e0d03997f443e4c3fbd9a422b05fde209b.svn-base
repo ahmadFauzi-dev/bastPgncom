@@ -1,0 +1,205 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Monitoring extends MY_Controller {
+
+	function __construct() {		
+        parent::__construct();        
+    }
+	
+	public function index ()
+	{
+		vd::dump($this->session->userdata('username'));
+	}
+	
+	public function getdetail_validasi ($satu, $dua, $tiga, $empat, $lima, $enam, $tujuh, $limit = '25', $offset = '0', $order = '')
+	{	
+		if($order > '' ){
+			$orderby = " ORDER BY ". $order ;
+		} 
+
+		if($limit != 'All')
+		{
+			$limitnya = " LIMIT ".$limit;
+
+			if ($offset > 0)
+			{
+				$limitnya .= " OFFSET ".$offset;
+			}
+		}
+		$query = "select * from getdetail_validasi('". $satu ."' , '".$dua."', '".$tiga."' , '".$empat."' , '".$lima."' , '".$enam."' , '".$tujuh."') ".$orderby." ".$limitnya;
+		$sql = $this->db->query($query);
+		
+		if($sql->num_rows > 0){
+			return $sql->result();
+		} else{
+			return false;
+		}	
+	}
+	
+	public function total_getdetail_validasi ($satu, $dua, $tiga, $empat, $lima, $enam, $tujuh)
+	{	 
+		$sql = $this->db->query("select * from getdetail_validasi('$satu', '$dua', '$tiga', '$empat' , '$lima' , '$enam' , '$tujuh')");		
+		return $sql->num_rows();					
+	}
+	
+	public function findareavalidasiamr ()
+	{
+		$this->load->model('b_model');
+		
+		// default:  lepasin saya
+		$bulan = whereTofilter('fmonth', (int)date("m") , 'numeric' , 'eq');
+		$tahun = whereTofilter('fyear', (int)date("Y") , 'numeric' , 'eq');
+		// $kemarinlusa = whereTofilter('tanggal', date("Y-m-d", time() - 172800) , 'date' , 'gt');
+		
+		$canrd = whereTofilter('sbu', $this->session->userdata('rd') , 'list' , '');	
+		$canarea = whereTofilter('area', $this->session->userdata('area') , 'list' , '');		
+		
+		$filter = $this->input->get('filter', TRUE) > ''? $this->input->get('filter', TRUE) : array();		
+		
+		$startt = $this->input->get('bulan',true) > '' ? whereTofilter('fmonth', $this->input->get('bulan',true) , 'numeric' , 'eq') : $bulan;
+		$endd = $this->input->get('tahun',true) > '' ? whereTofilter('fyear', $this->input->get('tahun',true) , 'numeric' , 'eq') : $tahun ;	
+		
+		$sbu = $this->input->get('sbu',true) > '' ? whereTofilter('sbu', $this->input->get('sbu',true) , 'string' , 'eq') : $canrd ;
+		$area = $this->input->get('area',true) > '' ? whereTofilter('area', $this->input->get('area',true) , 'string' , 'eq') : $canarea ;
+		$stream = $this->input->get('stream',true) > '' ? whereTofilter('streamid', $this->input->get('stream',true) , 'numeric' , 'eq') : '' ;
+		if ($this->input->get('keterangan') != 'All'){
+			$keterangan = whereTofilter('keterangan', $this->input->get('keterangan',true) , 'string' , 'eq') ;
+		}
+		
+		array_push($filter, $startt, $endd, $sbu, $area, $stream, $keterangan);
+		
+		$limit = $this->input->get('limit', TRUE) > '' ? $this->input->get('limit', TRUE) : 25;
+	    $offset = $this->input->get('start', TRUE);
+	    
+	    $sorts = json_decode($this->input->get('sort', TRUE));
+	    if ($sorts) {
+		    foreach ($sorts as $sort) {
+		        $orders[] = $sort->property.' '.$sort->direction;
+		    }
+		    $order_by = implode(', ', $orders);
+	    } else {
+	    	$order_by = 'sbu,area,seqnum asc';
+	    }	
+
+	    $total_entries  = $this->b_model->count_all_data('v_tbmonitoring_validasi', $filter);
+		$entries 		= $this->b_model->get_all_data('v_tbmonitoring_validasi', $filter , $limit, $offset, $order_by);
+		// $totalvalidate 	= $this->b_model->count_all_data('v_h_penyaluran_amr_daily', $filter);		
+	    $data['success'] = true;
+	    $data['total'] = $total_entries;
+	    $data['data'] = $entries;  
+		
+	    // vd::dump($data); 
+	    extjs_output($data);	
+		
+	}
+	
+	public function hitung_hari(){
+		$tahun = $this->input->post('tahun', TRUE);
+		$bulan = $this->input->post('bulan', TRUE);	
+		$data['success'] = true;
+		$data['data'] = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
+		extjs_output($data);
+	}
+	
+	public function findareavalidasidetailamr ()
+	{
+		
+		$satu = $this->input->get('ket');
+		$dua = $this->input->get('sbu');
+		$tiga = $this->input->get('area');
+		$empat = $this->input->get('stream');
+		$lima = $this->input->get('fyear');
+		$enam = $this->input->get('fmonth');
+		$tujuh = $this->input->get('fday');
+		
+		$limit = $this->input->get('limit', TRUE) > '' ? $this->input->get('limit', TRUE) : 25;
+	    $offset = $this->input->get('start', TRUE);
+	    
+	    $sorts = json_decode($this->input->get('sort', TRUE));
+	    if ($sorts) {
+		    foreach ($sorts as $sort) {
+		        $orders[] = $sort->property.' '.$sort->direction;
+		    }
+		    $order_by = implode(', ', $orders);
+	    } else {
+	    	$order_by = "no_reff asc";
+	    }	
+
+		$total_entries =$this->total_getdetail_validasi ($satu, $dua, $tiga, $empat, $lima, $enam, $tujuh);
+		$entries  = $this->getdetail_validasi ($satu, $dua, $tiga, $empat, $lima, $enam, $tujuh , $limit, $offset, $order_by);
+		
+		$data['success'] = true;
+	    $data['total'] = $total_entries;
+	    $data['data'] = $entries;  
+		
+	    extjs_output($data);	
+
+	}
+	
+	public function findpelvalidasiamr ()
+	{
+		$this->load->model('b_model');
+		
+		$kemarin = date("Y-m-d", time() - 86400) ;
+		$kemarinlusa = date("Y-m-d", time() - 172800);
+		
+		$keterangan = $this->input->get('keterangan',true);
+		$tahunbulan = substr($kemarinlusa, 0, 7); 
+		$awaltanggal = "01";
+		$starttt = $tahunbulan."-".$awaltanggal;
+		
+		$satu = $this->input->get('startt',true) > '' ? $this->input->get('startt',true)."-01" : $starttt ;
+		$dua = $this->input->get('endd',true) > '' ? $this->input->get('endd',true)."-01" : $starttt ;
+		
+		$canrd = whereTofilter('sbu', $this->session->userdata('rd') , 'list' , '');	
+		$canarea = whereTofilter('area', $this->session->userdata('area') , 'list' , '');		
+		$nofcanarea = $this->session->userdata('area');		
+		
+		$filter = $this->input->get('filter', TRUE) > ''? $this->input->get('filter', TRUE) : array();		
+				
+		$sbu = $this->input->get('sbu',true) > '' ? whereTofilter('sbu', $this->input->get('sbu',true) , 'string' , 'eq') : $canrd ;
+		$area = $this->input->get('area',true) > '' ? $this->input->get('area',true) : $nofcanarea ;
+		$id_pel = $this->input->get('id_pel',true) > '' ? $this->input->get('id_pel',true) : '' ;
+		$nama_pel = $this->input->get('nama_pel',true) > '' ? $this->input->get('nama_pel',true) : '' ;
+		if ($keterangan && $keterangan != 'All'){
+			$keterangan = whereTofilter('keterangan', $this->input->get('keterangan',true) , 'string' , 'eq') ;
+		}	else { $keterangan = ''; }	
+		array_push($filter, $sbu, $keterangan);
+		$filters = generate_filter($filter, 'okeh');
+		$limit = $this->input->get('limit', TRUE) > '' ? $this->input->get('limit', TRUE) : 25;
+	    $offset = $this->input->get('start', TRUE);
+	    
+	    $sorts = json_decode($this->input->get('sort', TRUE));
+	    if ($sorts) {
+		    foreach ($sorts as $sort) {
+		        $orders[] = $sort->property.' '.$sort->direction;
+		    }
+		    $order_by = implode(', ', $orders);
+	    } else {
+	    	$order_by = 'nama_pel asc';
+	    }	
+		
+		$query = " getsummarypel_validasi(
+						 '',
+						 '',
+						 '".$satu."',
+						 last_day( '".$dua." '),
+						 '',
+						 '".$area."',
+						 '1,2',
+						 '".$id_pel."',
+						 '".$nama_pel."')";
+	    $total_entries  = $this->b_model->count_all_data_func($query, $filters);
+		$entries 		= $this->b_model->get_all_datafunc($query, $filters , $limit, $offset, $order_by);
+		
+	    $data['success'] = true;
+	    $data['total'] = $total_entries;
+	    $data['data'] = $entries;  
+				
+	    extjs_output($data);	
+		
+	}
+	
+	
+	
+}

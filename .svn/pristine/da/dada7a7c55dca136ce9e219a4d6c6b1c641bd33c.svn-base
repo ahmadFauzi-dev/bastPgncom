@@ -1,0 +1,127 @@
+Ext.define('analisa.view.gridreportamr' ,{
+	extend: 'Ext.grid.Panel', 
+	initComponent	: function()
+	{		
+		Ext.define('modelGridHistory',{
+			extend	: 'Ext.data.Model',
+			fields	: ['penyaluranid','id_pel','namapel', 'sbu', 'area', 'tanggal', 'status','stream',
+			   'fdate','fmonth','fyear','fdvc','fdvm','fvm','fvc','fp','ft','created_by','creation_date'		
+			]
+		});			
+		
+		var storeGridHistory = Ext.create('Ext.data.JsonStore',{
+			model	: 'modelGridHistory',
+			storeId: 'amrHistoryStore',
+			proxy: {
+				type: 'pgascomProxy',			
+				url: base_url+'analisa/findhistorypenyaluran',
+				reader: {
+					type: 'json',				
+					root: 'data'
+				}			
+			}
+		});				
+		storeGridHistory.load();		
+		
+		Ext.apply(this, {	
+			title  		: 'Report Data AMR',			
+			frame: true,	
+			iconCls 	: 'date_edit',			
+			store		: storeGridHistory,
+			id			: 'gridReportDataAmr',			
+			dockedItems: [			
+			{
+				xtype: 'pagingtoolbar',
+				dock: 'bottom',
+				store: storeGridHistory,
+				displayInfo: true,
+				plugins : [Ext.create('Ext.ux.PagingToolbarResizer')]
+			}],			
+			columns		: [
+				Ext.create('Ext.grid.RowNumberer',
+					{
+						header: 'No', 
+						width: 40
+					}
+					),				
+				{
+					text	: 'RD',
+					// locked : true,
+					width	: 60,
+					cls : 'header-cell',
+					dataIndex	: 'sbu'
+				},
+				{
+					text	: 'Area',
+					// locked : true,
+					width	: 80,
+					cls : 'header-cell',
+					dataIndex	: 'area'
+				},	
+				{
+					text	: 'No Reff',
+					// locked : true,
+					width	: 90,
+					cls : 'header-cell',
+					dataIndex	: 'id_pel'
+				},
+				{
+					text	: 'Nama Pelanggan',
+					// locked : true,
+					width	: 110,									
+					cls : 'header-cell',
+					dataIndex	: 'namapel'
+				},
+				{
+					text	: 'Stream',
+					// locked : true,
+					width	: 50,	
+					align	: 'center',
+					dataIndex	: 'stream'
+				},		
+				{
+					text	: 'Tanggal',
+					// locked : true,
+					width		: 70,
+					cls : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'tanggal'
+				},
+				{
+					dataIndex	: 'status',
+					// locked : true,
+					text	: 'Status',
+					width		: 240,
+					align	: 'center'					
+				},				
+				{
+					text	: 'FDVC',				
+					width		: 100,
+					cls : 'header-cell',
+					align	: 'right',
+					type	: 'float',
+					dataIndex	: 'fdvc'
+				},
+				{
+					text	: 'Created By',				
+					width		: 100,
+					cls : 'header-cell',					
+					dataIndex	: 'created_by'
+				},
+				{
+					text	: 'Created Date',				
+					width		: 100,
+					cls : 'header-cell',				
+					dataIndex	: 'creation_date'
+				}			
+			],
+			listeners	: 
+				{
+
+				}		
+			}
+		);
+		this.callParent(arguments);
+	}	
+	
+});

@@ -1,0 +1,201 @@
+<?php if( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class M_model extends CI_Model{	
+	
+	// protected $salt1 = 'pgn_';
+	// protected $salt2 = '_com';
+	
+	function __construct(){
+		parent::__construct();	
+	}
+
+	/* for auth controllers */
+	
+/*	public function check_login($username, $password, $decode_pass = FALSE){
+		$password = $decode_pass ? md5($this->salt1.$password.$this->salt2) : $password;
+		$users_db_search_data = array(
+			'users.username' => $username,
+			'users.password' => $password
+			//'active' => 'Y'
+		);		
+		$this->db->select('users.id'); 
+		$this->db->from('users');
+		$this->db->where($users_db_search_data);				
+		$users_db_query = $this->db->get();
+		
+		if($users_db_query->num_rows == 1){
+			return $users_db_query->row('id');			
+		} else{
+			return false;
+		}
+		
+	}	
+	
+	public function userdata_by_id($id){
+		$users_db_search_data = array(
+			'users.id' => $id,
+		);		
+		$this->db->where($users_db_search_data); 
+		$this->db->from('users');
+		$users_db_query = $this->db->get();		
+		if($users_db_query->num_rows == 1){
+			return $users_db_query;
+		} else{
+			return false;
+		}
+	}
+	
+	public function user_by_id($id){
+		$users_db_search_data = array(
+			'users.id' => $id,
+		);
+		
+		$this->db->where($users_db_search_data); 
+		$this->db->from('users');
+		$users_db_query = $this->db->get();		
+		if($users_db_query->num_rows == 1){
+			return $users_db_query->row();
+		} else{
+			return false;
+		}
+	}
+	*/
+	
+	/*
+	public function terbilang($number){ 
+		if(!is_numeric($number)) return $number; 
+		else $string=''; 
+		$angka=array('',' satu',' dua',' tiga',' empat',' lima',' enam',' tujuh',' delapan',' sembilan');
+		$level=array('',' ribu',' juta',' milyar',' trilyun',' bilyun',' quartilyun',' quintilyun'); 
+		$number=strrev($number); 
+		for($i=0;$i<intval(ceil(strlen($number)/3));$i++){ 
+			$char=substr($number,$i*3,3); 
+			if($char==0) continue; 
+			elseif((strrev($char)==1)&&($i==1)) $string=' seribu'.$string; 
+			else{ 
+				$string=$level[$i].$string; 
+				$satu=intval(substr($char,0,1)); 
+				$dua=intval(substr($char,1,1)); 
+				$tiga=intval(substr($char,2,1)); 
+				if(($dua==1)&&($satu==0)) $string=' sepuluh'.$string; 
+				elseif(($dua==1)&&($satu==1)) $string=' sebelas'.$string; 
+				elseif($dua==1) $string=$angka[$satu].' belas'.$string; 
+				else{ 
+					$string=$angka[$satu].$string; 
+					if($dua>1) $string=$angka[$dua].' puluh'.$string; 
+				} 
+				if($tiga==1) $string=' seratus'.$string; 
+				elseif($tiga>1) $string=$angka[$tiga].' ratus'.$string; 
+			} 
+		} 		
+		return substr($string, 1); 
+	}  
+	
+	
+	public function Tanggal_Indo($date){
+		$tahun = substr($date, 0, 4);
+		$bulan = substr($date, 5, 2);
+		$tgl   = substr($date, 8, 2);
+	 
+		$result = $tgl .'-'. $bulan .'-'. $tahun;	
+
+		return($result);
+	}
+	*/
+	
+	public function dateTonum($date){
+		$tahun = substr($date, 0, 4);
+		$bulan = substr($date, 5, 2);
+		$tgl   = substr($date, 8, 2);
+		$jam   = substr($date, 11, 2);
+		$menit = substr($date, 14, 2);
+		$detik = substr($date, 17, 2);	 
+		$result = $tahun . $bulan . $tgl . $jam . $menit . $detik;		
+		return(intval($result));
+	}
+
+	public function numTodate($num)
+	{
+		return(date('Y/m/d H:i:s', $num);
+	}
+
+	
+	/* for all controllers */
+	
+	public function get_all_data($table, $filter = array() , $limit = '25', $offset = '0', $order = ''){	
+
+		if (is_array($filter) && count($filter) > 0) generate_filter($filter);
+
+		if($order > ''){
+			$this->db->order_by($order);
+		}
+		/*if(!empty($where)){
+			$this->db->where($where);
+		}*/
+		$this->db->limit($limit, $offset);
+		$news_db_query= $this->db->get($table);	
+		if($news_db_query->num_rows > 0){
+			return $news_db_query->result();
+		}else{
+			return false;
+		}			
+	}
+	
+	
+	public function get_data_pengukuran(){	
+		
+		$query = "SELECT * FROM v_taxationpengukuran";
+		$news_db_query	= $this->db->query($query);
+		//var_dump($data);
+		if($news_db_query->num_rows > 0){
+			return $news_db_query->result();
+		}else{
+			return false;
+		}
+		
+	}
+	
+	public function insert_data($table, $data){
+		
+		$this->db->insert($table, $data);
+		if($this->db->affected_rows() == 1){
+			return $this->db->insert_id();
+		} else{
+			return false;
+		}
+	}
+ 
+	public function update_data($table, $filter = array() ,$data){ 
+ 		if (is_array($filter) && count($filter) > 0) generate_filter($filter);
+		// $this->db->where($where);
+		$this->db->update($table, $data);
+		if($this->db->affected_rows() == 1){
+			return true;
+		} else{
+			return false;
+		}
+	}
+
+	public function delete_data($table, $filter = array()){ 
+		if (is_array($filter) && count($filter) > 0) generate_filter($filter);		
+		// $this->db->where($where);
+		$this->db->delete($table);
+
+		if($this->db->affected_rows() > 0){
+			return true;
+		} else{
+			return false;
+		}
+	}
+ 
+	public function count_all_data($table, $filter = array()){
+		$this->db->from($table);
+		/*if(!empty($where)){
+			$this->db->where($where);
+		}*/   
+
+		if (is_array($filter) && count($filter) > 0) generate_filter($filter);
+		return $this->db->count_all_results();
+	}
+	
+}

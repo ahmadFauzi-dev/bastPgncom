@@ -1,0 +1,59 @@
+Ext.define('monitoring.view.datatable' ,{
+	extend: 'Ext.grid.Panel',
+	initComponent	: function()
+	{
+	//var formtambahpelanggan = Ext.create('master.view.formtambahpelanggan');
+	//var formtambahkontrak = Ext.create('master.view.formtambahkontrak');
+	
+	//var gridlayanan = Ext.create('master.view.gridlayanan');
+	var msclass = Ext.create('master.global.geteventmenu'); 
+	var model = msclass.getmodel('pg_catalog.pg_tables');
+	var columns = msclass.getcolumn('pg_catalog.pg_tables');
+	var store =  msclass.getstore(model,'pg_catalog.pg_tables',filter);
+	var tambahpelanggan;
+	var filter = [];
+	
+	var data_items;
+	
+	store.load();
+	coldisplay	= [{
+		text		: 'Nama Table',
+		dataIndex	: 'tablename',
+		flex		: 1
+	}]
+		Ext.apply(this, {
+			store		: store,
+			multiSelect	: true,
+			height		: 300,
+			autoScroll	: true,
+			id			: ''+Init.idmenu+'gridmutasi',	
+			columns		: coldisplay,
+			bbar		: Ext.create('Ext.PagingToolbar', {
+				pageSize: 10,
+				store		: store,
+				displayInfo	: true
+			}),
+			listeners		: {
+				itemclick	: function(view, record, item, index, e, eOpts)
+				{
+					
+					//var store = Ext.getCmp(''+Init.idmenu+'gridlayananupdate').getStore();
+					var data_sel = record.data;
+					/*
+					store.getProxy().extraParams = {
+					view : "pgcom.v_layanan",
+						"filter[0][field]" : "kontrak_rowid",
+						"filter[0][data][type]" : "string",
+						"filter[0][data][comparison]" : "eq",
+						"filter[0][data][value]" : data_sel.idkontrak
+					};	
+					store.load();
+					data_items = record.data;
+					*/
+					//data = record.data;
+				}
+			}
+		});
+		this.callParent(arguments);
+	}
+})

@@ -1,0 +1,365 @@
+Ext.define('analisa.bulk.view.gridfinal' ,{
+    extend: 'Ext.grid.Panel',
+	id    : Init.idmenu+'grid',
+    initComponent: function() {
+	var filter 		= [];
+	var data;
+	var msclass 	= Ext.create('master.global.geteventmenu');
+	var model 		= msclass.getmodel('v_penyaluranbulkdailyfinal');
+	model.push('field');
+	model.push('kategori');
+	model.push('keterangan');
+	var store 		=  msclass.getstore(model,'v_penyaluranbulkdailyfinal',filter);
+	model.push('selectopts');
+	//console.log(model);
+	
+	//storemstation.reload();
+	//store.load();
+	
+	/*
+	Ext.define('mstationconfigdetail',{
+		extend	: 'Ext.data.Model',
+		fields	: ['tbl_station_id','tanggalpengukuran','volume','energy','ghv','pin','pout','temperature','counter_volume','counter_energy','tanggal','stat','stationname','error','tglpenyalurandate']
+	});
+	*/
+	Ext.util.Format.thousandSeparator = '.';
+	Ext.util.Format.decimalSeparator = ',';
+	
+	var editing = Ext.create('Ext.grid.plugin.RowEditing', {
+		  clicksToEdit: 2,
+		  listeners :
+			{					
+				'edit' : function (editor,e) {
+						 
+						 var grid 	= e.grid;
+						 var record = e.record;
+						 
+						var recordData = record.data; 
+						Ext.Ajax.request({ 
+							
+							url: base_url+'admin/insertdatamanualbulk',
+							method: 'POST',
+							params: recordData,
+							success: function(response,requst){
+								//workflowGrid.load();
+								//console.log(response.text);
+								//alert('test');
+								storegridstationconfigdetail.reload();
+							},
+							failure:function(response,requst)
+							{
+								Ext.Msg.alert('Fail !','Input Data Entry Gagal');
+								Ext.Msg.alert('Warning!', 'Authentication server is unreachable : ' + action.response.responseText + "");
+							}
+										
+						})
+							
+				}
+			}
+		});
+		
+		var filterconfig = {ftype	: 'filters',
+			filters	: [
+				{
+					type	: 'date',
+					dateFormat	: 'Y-m-d',
+					dataIndex	: 'tglpenyalurandate'
+				}
+			]
+		};
+		
+		Ext.apply(this, {
+			store		: store,
+			title		: 'Grid Penyaluran',
+			//height		: 200,
+			multiSelect	: true,
+			selType		: 'checkboxmodel',
+			autoScroll	: true,
+			id    		:  ''+Init.idmenu+'gridfinal',
+			loadMask: true, 
+			tbar		: [
+			{
+				text	: 'Un Approve',
+				iconCls	: 'cancel',
+				handler	: function()
+				{
+						Init.gridutama = ''+Init.idmenu+'gridfinal';
+						msclass.unapprovebulk(''+Init.idmenu+'gridfinal');
+						//console.log(Init.gridutama);
+						/* 		store.reload();
+						store.reload();
+						store.reload(); */
+				}
+				
+			},'-',
+			{
+				text	: 'Export',
+				iconCls	: 'page_white_excel',
+				handler	: function()
+				{
+					msclass.exportdata(''+Init.idmenu+'gridfinal','v_penyaluranbulkdailyfinal');
+				}
+			},
+			{
+				text	: 'Penyaluran Hourly',
+				iconCls	: 'application_form_magnify',
+				handler	: function()
+				{
+					var gridhourly = Ext.create('analisa.bulk.view.gridanomalihourly');
+					var storeHourlykelengkapan =  gridhourly.getStore();	
+					//console.log(data);
+					storeHourlykelengkapan.getProxy().extraParams = {
+						view	: 'v_penyaluranstationhourly',
+						"filter[0][field]" : "tanggal_pengukuran",
+						"filter[0][data][type]" : "timestamp",
+						"filter[0][data][comparison]" : "gt",
+						"filter[0][data][value]" : data.tanggal_pengukuran+" 00:00:00",
+						
+						"filter[1][field]" : "tanggal_pengukuran",
+						"filter[1][data][type]" : "timestamp",
+						"filter[1][data][comparison]" : "lt",
+						"filter[1][data][value]" : data.tanggal_pengukuran+" 23:59:59",
+						
+						"filter[2][field]" : "stationid",
+						"filter[2][data][type]" : "string",
+						"filter[2][data][comparison]" : "eq",
+						"filter[2][data][value]" : data.stationid
+							
+					};
+					storeHourlykelengkapan.load();
+					var name = 'kelengkapandatahourly';
+					var tambahadd = Ext.create("Ext.tab.Panel",{
+						title		: 'Penyaluran Hourly',
+						id			: name,
+						closable	: true,
+						//xtype		: 'panel',
+						iconCls		: 'application_cascade',
+						//closable	: true,
+						//overflowY	: 'scroll',
+						bodyPadding	: '5 5 0',
+						items		: [{
+							xtype	: 'panel',
+							title  : name,
+							frame: true,	
+							iconCls 	: 'application_view_gallery',
+							layout: 'border',
+							defaults: {
+								collapsible: true,
+								split: true,
+								//bodyStyle: 'padding:5px'
+							},
+							items	: [{
+								xtype 	: 'panel',
+								title	: 'Automatic',
+								layout	: 'fit',
+								region  : 'center',
+								frame	: true,
+								flex	: 3,
+								items	: gridhourly
+							},
+							{
+								xtype : 'panel',						
+								region : 'east',
+								frame	: true,
+								border	: false,					
+								title : 'Status Anomali',					
+								layout: 'fit',					
+								flex: 1,
+								border: false
+							}]
+							
+						}]
+					});
+					var tabPanelas = Ext.getCmp('contentcenter');
+					var items = tabPanelas.items.items;
+					var exist = false;
+					for(var i = 0; i < items.length; i++)
+					{
+						if(items[i].id == name){
+								tabPanelas.setActiveTab(name);
+								tabPanelas.remove(name);
+								Ext.getCmp('contentcenter').add(tambahadd);
+								tabPanelas.setActiveTab(name);	
+								exist = true;
+						}
+					}
+					
+					if(!exist){
+						Ext.getCmp('contentcenter').add(tambahadd);
+						tabPanelas.setActiveTab(name);	
+					}
+				}
+			}],
+			columns		: [
+			Ext.create('Ext.grid.RowNumberer',{header:'No',width:40}),
+			{
+				text	: 'Status Data',
+				locked   : true,
+				dataIndex	: 'status_data'
+			},
+			{
+				"text"	: "Station Name",
+				locked   : true,
+				//flex	: 1,
+				"dataIndex" : "nama_station"
+			},
+			{
+				"text"		: "Tanggal Pengukuran",
+				xtype		: 'datecolumn',
+				locked   : true,
+				//flex	: 1,
+				"dataIndex"	: "tanggal_pengukuran",
+				format		: 'Y-m-d'
+			},
+			{
+				text	: 'Volume <br /> (MSCF)',
+				align	: 'center',
+				cls   	: 'header-cell',
+				align	: 'right',
+				//flex	: 1,
+				//xtype	: 'numbercolumn',
+				//format	: '0.00000000000000',
+				dataIndex	: 'volume',
+				renderer	: function(value, metaData, record, rowIdx, colIdx, store, view)
+				{
+					return Ext.util.Format.number(value, '0,000.0000');
+				}
+			},
+			{
+				text	: 'Volume <br /> (M3)',
+				align	: 'center',
+				cls   	: 'header-cell',
+				align	: 'right',
+				dataIndex	: 'volm3',
+				renderer	: function(value, metaData, record, rowIdx, colIdx, store, view)
+				{
+					return Ext.util.Format.number(value, '0,000.0000');
+				}
+			},
+			{
+				text	: 'Energy <br /> (MMBTU)',
+				align	: 'center',
+				cls   	: 'header-cell',
+				align	: 'right',
+				//flex	: 1,
+				dataIndex	: 'energy',
+				renderer	: function(value, metaData, record, rowIdx, colIdx, store, view)
+				{
+					return Ext.util.Format.number(value, '0,000.0000');
+				}
+			},
+			{
+				text	: 'Counter Volume <br /> (MSCF)',
+				align	: 'center',
+				cls   	: 'header-cell',
+				align	: 'right',
+				//flex	: 1,
+				dataIndex	: 'counter_volume',
+				renderer	: function(value, metaData, record, rowIdx, colIdx, store, view)
+				{
+					return Ext.util.Format.number(value, '0,000.0000');
+				}
+				
+			},
+			{
+				text	: 'Counter Energy <br /> (MMBTU)',
+				align	: 'center',
+				cls   	: 'header-cell',
+				align	: 'right',
+				//flex	: 1,
+				dataIndex	: 'counter_energy',
+				renderer	: function(value, metaData, record, rowIdx, colIdx, store, view)
+				{
+					return Ext.util.Format.number(value, '0,000.0000');
+				}
+			},
+			{
+				text	: 'GHV <br /> (BTU/SCF)',
+				align	: 'center',
+				cls   	: 'header-cell',
+				align	: 'right',
+				//flex	: 1,
+				dataIndex	: 'ghv',
+				renderer	: function(value, metaData, record, rowIdx, colIdx, store, view)
+				{
+					return Ext.util.Format.number(value, '0,000.0000');
+				}
+			},
+			{
+				text	: 'Tekanan IN <br /> (PSIG)',
+				align	: 'center',
+				cls   	: 'header-cell',
+				align	: 'right',
+				//flex	: 1,
+				dataIndex	: 'pressureinlet',
+				renderer	: function(value, metaData, record, rowIdx, colIdx, store, view)
+				{
+					return Ext.util.Format.number(value, '0,000.0000');
+				}
+			},
+			{
+				text	: 'Tekanan OUT <br /> (PSIG)',
+				align	: 'center',
+				cls   	: 'header-cell',
+				align	: 'right',
+				//flex	: 1,
+				dataIndex	: 'pressureoutlet',
+				renderer	: function(value, metaData, record, rowIdx, colIdx, store, view)
+				{
+					return Ext.util.Format.number(value, '0,000.0000');
+				}
+			},
+			{
+				text	: 'Temperature',
+				align	: 'center',
+				cls   	: 'header-cell',
+				align	: 'right',
+				//flex	: 1,
+				dataIndex	: 'temperature',
+				renderer	: function(value, metaData, record, rowIdx, colIdx, store, view)
+				{
+					return Ext.util.Format.number(value, '0,000.0000');
+				}
+			},
+			{
+				text	: 'Approve By',
+				dataIndex	: 'creperson'
+			},
+			{
+				text	: 'Approve Date',
+				dataIndex	: 'credate',
+				width	: 150
+			}],
+			features	: [filterconfig],
+			plugins	: editing,
+			bbar: Ext.create('Ext.PagingToolbar', {
+				pageSize: 10,
+				store: store,
+				displayInfo: true
+			}),
+			listeners	: 
+			{
+				beforeitemcontextmenu: function(view, record, item, index, e)
+				{
+					e.stopEvent();
+					data = record.data;
+					medugridkelengkapan.showAt(e.getXY());
+				},
+				itemclick	: function(view, record, item, index, e, eOpts)
+				{
+					data = record.data;
+				},
+				select: function (model, record, index, eOpts) {
+					record.set('selectopts',true);
+				},
+				deselect: function (view, record, item, index, e, eOpts) {
+					//console.log('deselect fired'+index);
+					//record.data.selectopts = false;
+					record.set('selectopts',false);
+				}
+			}
+		});
+
+        this.callParent(arguments);
+    }
+});

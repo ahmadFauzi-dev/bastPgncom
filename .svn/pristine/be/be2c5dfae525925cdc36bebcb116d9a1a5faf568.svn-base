@@ -1,0 +1,210 @@
+Ext.define('monitoring.view.gridareavalidasi' ,{
+	extend: 'Ext.grid.Panel',
+	initComponent	: function()
+	{
+
+	var jumlah_harii = function(tahun,bulan){
+		return new Date(tahun,bulan,0).getDate(); 
+	};
+	
+	var dd = Ext.getCmp('bulandatanya').getValue(), asember = [];
+	if(!dd ){
+		var d = new Date();
+		// console.log(dd);
+	} else {
+		var fmonth = dd.substr(5, 2);
+		var fyear = dd.substr(0, 4);
+		var d = new Date(dd);
+		// console.log(dd);
+	}
+	var days = ["","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","Nopember","Desember"];
+	// console.log(jumlah_hari(d.getFullYear(),d.getMonth()));
+	
+		Ext.define('modelGridareaval',{
+			extend	: 'Ext.data.Model',
+			fields	: ['rowid','sbu','area','streamid','fyear','fmonth','keterangan', 'total',
+			{name: 'd1', type : 'int'},
+			{name: 'd2', type : 'int'},
+			{name: 'd2', type : 'int'},
+			{name: 'd3', type : 'int'},
+			{name: 'd4', type : 'int'},
+			{name: 'd5', type : 'int'},
+			{name: 'd6', type : 'int'},
+			{name: 'd7', type : 'int'},
+			{name: 'd8', type : 'int'},
+			{name: 'd9', type : 'int'},
+			{name: 'd10', type : 'int'},
+			{name: 'd11', type : 'int'},
+			{name: 'd12', type : 'int'},
+			{name: 'd13', type : 'int'},
+			{name: 'd14', type : 'int'},
+			{name: 'd15', type : 'int'},
+			{name: 'd16', type : 'int'},
+			{name: 'd17', type : 'int'},
+			{name: 'd18', type : 'int'},
+			{name: 'd19', type : 'int'},
+			{name: 'd20', type : 'int'},
+			{name: 'd21', type : 'int'},
+			{name: 'd22', type : 'int'},
+			{name: 'd23', type : 'int'},
+			{name: 'd24', type : 'int'},
+			{name: 'd25', type : 'int'},
+			{name: 'd26', type : 'int'},
+			{name: 'd27', type : 'int'},
+			{name: 'd28', type : 'int'},
+			{name: 'd29', type : 'int'},
+			{name: 'd30', type : 'int'},
+			{name: 'd31', type : 'int'}
+			] });
+		var storeGridareaval = Ext.create('Ext.data.JsonStore',{
+			model	: 'modelGridareaval',
+			storeId: 'areavalStore',
+			proxy: {
+				type: 'pgascomProxy',
+				// pageParam: false, 
+				// startParam: false, 
+				// limitParam: false,
+				url: base_url+'analisa/monitoring/findareavalidasiamr',
+				reader: {
+					type: 'json',				
+					root: 'data'
+				}			
+			}
+		});		
+		
+		// storeGridareaval.load();
+	
+		for (i = 1; i < 32/*jumlah_harii(d.getFullYear(),d.getMonth()+1)+1 */; i++) {
+			asember[i] = 
+			{
+				dataIndex : 'd'+i,
+				align	: 'right',
+				autoSizeColumn : true,
+				text : i,
+				summaryType: 'sum',
+				summaryRenderer: function(value, meta, record) {					
+					meta.style = "font-weight: bold;font-size: 13px;";						
+					return value
+				},
+				renderer: function(value, meta, record) {
+					return "<a href='#'><span style='color:blue;text-decoration: underline;font-weight:bold' >"+value+"</span></a>";
+				}
+
+			}		
+		}
+		
+		
+		Ext.apply(this, {
+			store	: storeGridareaval,
+			columnLines: true, 
+			id		: 'grid_areavalidasi',
+			features: [{								
+				ftype: 'summary'
+			}],			
+			dockedItems: [					
+				{
+					xtype: 'pagingtoolbar',
+					dock: 'bottom',
+					store: storeGridareaval,
+					displayInfo: true,
+					// plugins : [Ext.create('Ext.ux.PagingToolbarResizer')]
+				}],			
+			columns		: [
+				Ext.create('Ext.grid.RowNumberer',
+					{
+						header: 'No', 
+						width: 40,
+						autoSizeColumn : true,
+					}
+					),				
+				{	
+					dataIndex : 'sbu',
+					cls   : 'header-cell',
+					align	: 'left',
+					width: 60,
+					autoSizeColumn : true,
+					text : 'RD'					
+				},	
+				{	
+					dataIndex : 'area',
+					cls   : 'header-cell',
+					align	: 'left',
+					width: 90,
+					autoSizeColumn : true,
+					text : 'Area'			
+					
+				},
+ 				{	
+					dataIndex : 'streamid',
+					align	: 'center',
+					autoSizeColumn : true,
+					text : 'Stream'					
+				},
+				{	
+					dataIndex : 'keterangan',
+					cls   : 'header-cell',
+					align	: 'left',
+					autoSizeColumn : true,
+					text : 'Keterangan',
+					summaryType: 'count',
+					summaryRenderer: function(value, meta, rec) {
+						meta.style = "font-weight: bold;font-size: 13px;";						
+						return 'Total '
+					}
+				},				
+				{	
+					align	: 'left',
+					id:'kolombulan',
+					text : days[d.getMonth()+1] + ", " + d.getFullYear(),
+					columns : asember							
+				},
+				{
+					dataIndex : 'total',
+					cls   : 'header-cell',
+					align	: 'right',
+					autoSizeColumn : true,
+					text : 'Total'					
+					
+				}
+		],
+		viewConfig : {
+			listeners : {
+				
+				refresh: function(dataview) {
+					Ext.each(dataview.panel.columns, function(column) {
+						if (column.autoSizeColumn === true)
+							column.autoSize();
+						})
+					},					
+				
+				cellclick : function(view, cell, cellIndex, record, row, rowIndex, e){
+					var recom = record.data;
+					var ftanggal;
+					var clickedDataIndex = view.panel.headerCt.getHeaderAtIndex(cellIndex).dataIndex;
+					var clickedColumnName = view.panel.headerCt.getHeaderAtIndex(cellIndex).text;					
+					
+					if (cellIndex > 4) {
+						console.log(recom, clickedColumnName, clickedDataIndex);						
+						var SreavalidasiDetail = Ext.getCmp('GridareavalidasiDetail').getStore();
+						SreavalidasiDetail.removeAll();
+						SreavalidasiDetail.getProxy().extraParams = {
+							ket : recom.keterangan,
+							sbu	: recom.sbu,
+							area : recom.area,
+							stream : recom.streamid,
+							fyear : recom.fyear,
+							fmonth : recom.fmonth,
+							fday : clickedColumnName
+						};	
+						SreavalidasiDetail.reload();
+
+					} 
+					
+				}				
+			}
+		}
+			
+		});
+		this.callParent(arguments);
+	}
+})

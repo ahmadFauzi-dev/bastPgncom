@@ -1,0 +1,195 @@
+Ext.define('analisa.view.gridpenyaluranindustri' ,{
+	extend: 'Ext.grid.Panel',
+    
+	initComponent	: function()
+	{
+		Ext.define('mgridghvpelindustri',{
+		extend	: 'Ext.data.Model',
+		fields	: ['rowid','idpel','accid','pelname','stationid','ismultisource','tanggal','tanggal_mapping','id_unit_usaha','stationname','jenis_station','name_area','jenispel','ghv','name_sbu','terukur_m3','terukur_mmbtu','mmscfd','energi']
+	});
+	
+	var storesbu	= Ext.create('mapping.store.sbu');
+	var storearea 	= Ext.create('mapping.store.area');
+	
+	var itemsarea = new Array();
+	var itemssbu = new Array();
+	
+	storearea.load(function(records){
+		Ext.each(records, function(record){
+			itemsarea.push(record.get('area'));
+					//n++;
+		});
+	});
+	storesbu.load(function(records){
+		Ext.each(records, function(record){
+			itemssbu.push(record.get('description'));
+		});
+	});
+	
+	var storegridpelindustri = Ext.create('Ext.data.JsonStore',{
+		model	: 'mgridghvpelindustri',
+		proxy	: {
+		type			: 'pgascomProxy',
+		url				: base_url+'admin/mapping/getpenyaluranindustri',
+		//extraParams 	: {id : '24'},
+		reader: {
+			type: 'json',
+			root: 'data'
+		}
+		}
+	});
+	storegridpelindustri.load();
+	
+		
+		var filterconfig = {ftype	: 'filters',
+			filters	: [
+				{
+					type	: 'date',
+					dateFormat	: 'Y-m-d',
+					dataIndex	: 'tanggal_mapping'
+				},
+				{
+					type		: 'list',
+					dataIndex	: 'name_area',
+					options		: itemsarea,
+					phpMode		: true
+				},
+				{
+					type		: 'list',
+					dataIndex	: 'name_sbu',
+					options		: itemssbu,
+					phpMode		: true
+				}
+			]
+		};
+		var role = {"p_export"	: true};
+		//console.log(role.p_export);
+		
+		Ext.apply(this, {
+			store		: storegridpelindustri,
+			title		: 'GHV Pelanggan',
+			//height		: 200,
+			multiSelect	: true,
+			//selType		: 'checkboxmodel',
+			autoScroll	: true,
+			id			: 'penyaluranpelangganindustri1',
+			dockedItems	: [
+				{
+					xtype: 'toolbar',
+					items	: [{
+						iconCls	: 'page_white_excel',
+						xtype	: 'exporterbutton',
+						text	: 'Export',
+						hidden	: role.p_export,
+						format	: 'excel'
+					}]
+				}
+			],
+			columns		: [
+			Ext.create('Ext.grid.RowNumberer',{header:'No'}),
+			{
+				"text"	: "Id Pel",
+				"locked"	: true,
+				"dataIndex" : "idpel"
+			},{
+				"text"	: "accid",
+				"dataIndex"	 : "accid",
+				"locked"	: true,
+			},
+			{
+				"text"	: "Nama Pelanggan",
+				"locked"	: true,
+				"dataIndex"	: "pelname"
+			},{
+				"text"	: "Jenis Pelanggan",
+				"dataIndex"	: "jenispel"
+			},{
+				"text"	: "RD",
+				"dataIndex"	: "name_sbu"
+			},
+			{
+				"text"	: "Area",
+				"dataIndex"	: "name_area"
+			},
+			{
+				"text"	: "stationname",
+				"dataIndex"	: "stationname"
+			},{
+				"text"	: "jenis_station",
+				"dataIndex"	: "jenis_station"
+			},
+			{
+				"text"		: "Tanggal Mapping",
+				xtype		: 'datecolumn',
+				"dataIndex"	: "tanggal_mapping",
+				format		: 'Y-m-d'
+			},
+			/*
+			{
+					"text"		: "M3 <br /> 27&deg;C",
+					cls   		: 'header-cell',
+					align		: 'right',
+					dataIndex	: "terukur_m3"
+				},
+				{
+					"text"		: "MMSCFD",
+					cls   		: 'header-cell',
+					align		: 'right',
+					"dataIndex"	: "mmscfd"
+				},
+				{
+					"text"		: "GHV <br /> BTU/SCF",
+					cls   		: 'header-cell',
+					align		: 'right',
+					"dataIndex"	: "ghv"
+				},
+				{
+					"text"		: "Energi <br /> MMBTU",
+					cls   		: 'header-cell',
+					align		: 'right',
+					"dataIndex"	: "energi"
+				},
+			*/	
+			
+			{
+				"text"		: "Pengukuran",
+				cls   		: 'header-cell',
+				align		: 'right',
+				columns		: [
+				{
+					"text"		: "M3 <br /> 27&deg;C",
+					cls   		: 'header-cell',
+					align		: 'right',
+					dataIndex	: "terukur_m3"
+				},
+				{
+					"text"		: "MSCF",
+					cls   		: 'header-cell',
+					align		: 'right',
+					"dataIndex"	: "mmscfd"
+				},
+				{
+					"text"		: "GHV <br /> BTU/SCF",
+					cls   		: 'header-cell',
+					align		: 'right',
+					"dataIndex"	: "ghv"
+				},
+				{
+					"text"		: "Energi <br /> MMBTU",
+					cls   		: 'header-cell',
+					align		: 'right',
+					"dataIndex"	: "energi"
+				}]
+			}
+			],
+			features	: [filterconfig],
+			//plugins	: editing,
+			bbar: Ext.create('Ext.PagingToolbar', {
+				pageSize: 10,
+				store: storegridpelindustri,
+				displayInfo: true
+			})
+		});
+		this.callParent(arguments);
+	}
+})

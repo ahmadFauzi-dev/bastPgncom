@@ -1,0 +1,37 @@
+Ext.define('analisa.offtake.view.griddetailmessage' ,{
+    extend: 'Ext.grid.Panel',
+	//id    : Init.idmenu+'griddetailmessage',
+    initComponent: function() {
+	var filter 		= [];
+	var data;
+	var msclass 	= Ext.create('master.global.geteventmenu');
+	var model 		= msclass.getmodel('v_detaiilmessage');
+	var store 		= msclass.getstore(model,'v_detaiilmessage',filter);
+	var columns = msclass.getcolumn('v_detaiilmessage');
+	model.push('selectopts');
+	columns[1].hidden = true;
+	columns[2].hidden = true;
+	columns[3].hidden = true;
+	columns[4].hidden = true;
+	columns[5].hidden = true;
+	columns[7].hidden = true;
+	columns[6].flex = 1;
+	columns[6].tdCls = 'wrap-text';
+	//storemstation.reload();
+	//store.load();
+	Ext.apply(this, {
+			store		: store,
+			multiSelect	: true,
+			id			: ''+Init.idmenu+'griddetailmessage',
+			columns		: columns,
+			//plugins	: editing,
+			bbar: Ext.create('Ext.PagingToolbar', {
+				//pageSize: 10,
+				store: store,
+				displayInfo: true
+			})
+	});
+
+       this.callParent(arguments);
+    }
+});

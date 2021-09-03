@@ -1,0 +1,130 @@
+function apps(name, iconCls) {
+    
+    var formsearch = Ext.create('analisa.bulk.view.formanomali');
+	var grid = Ext.create('analisa.bulk.view.gridanomali');
+	var griddetailmessage = Ext.create('analisa.bulk.view.griddetailmessage');
+	var griddetailmessage2 = Ext.create('analisa.offtake.view.griddetailmessagegascomp');
+	var gridtaksasi = Ext.create('analisa.bulk.view.gridvalidtaksasi');
+	var griddokumenpendukungs = Ext.create('analisa.bulk.view.griddokref');
+	
+	//var formanomaliamr = Ext.create('analisa.view.formanomaliamr');
+	//var gridanomaliamr = Ext.create('analisa.view.gridanomaliamr');
+	//var gridanomalistatus = Ext.create('analisa.view.gridanomalistatus');
+	//var gridvolumehourly = Ext.create('analisa.view.gridvolumehourly');
+	
+	// var griddetaildata = Ext.create('analisa.view.griddatadetail');
+	// var griddetaildata;
+    //var gridkelamr = Ext.create('analisa.view.gridkelamr');	
+	
+    var tabPanel = Ext.getCmp('contentcenter');
+	tabPanel.items.each(function(c){
+		if (c.title != 'Home') {
+			tabPanel.remove(c);
+		}
+	});
+	
+    var items = tabPanel.items.items;
+    var exist = false;
+    // for (var i = 0; i < items.length; i++) {
+        // if (items[i].id == '3') {
+            // tabPanel.setActiveTab('3');
+            // exist = true;
+        // }
+    // }
+	
+    if (!exist) {
+        // Ext.getCmp('contentcenter')
+		tabPanel.add({
+            title			: name,
+            id				: '1anomali',
+            xtype			: 'panel',
+            iconCls			: iconCls,
+            closable		: true,
+            layout			: 'border',
+			setLoading		: true,
+            // overflowY	: 'scroll',
+            defaults: {
+                collapsible	: true,
+                split		: true,
+                //bodyStyle: 'padding:5px'
+            },
+            // bodyPadding: '5 5 0',
+            items: [
+			{
+                xtype		: 'panel',
+                title		: 'Form Search',
+                flex		: 1,
+				id 			: 'searchanomaliform',
+                region		: 'west',
+                bodyStyle	: 'padding:5px',
+				items	 	: formsearch
+            },
+			{
+				xtype		: 'tabpanel',
+				region 		: 'center',
+				flex		: 3,
+				layout		: 'fit',
+				title  		: name,
+				frame		: true,
+				id			: 'gridpenyaluran',
+				iconCls 	: 'application_view_gallery',
+				layout		: 'border',
+				items	: [{
+					title		: 'Automatic',
+					layout		: 'border',
+					defaults	: {
+						collapsible	: false,
+						split		: true,
+						//bodyStyle: 'padding:5px'
+					},
+					items		: [{
+						region		: 'center',
+						flex		: 3,
+						//title		: name,
+						layout		: 'fit',
+						items		: grid
+					},
+					{
+						flex		: 1,
+						region		: 'east',
+						title 		: 'Status Anomali',	
+						items	: [{
+							xtype	: 'panel',
+							layout: 'fit',
+							title	: 'Message Pengukuran',
+							items	: griddetailmessage
+						},
+						{
+							xtype	: 'panel',
+							layout: 'fit',				
+							title	: 'Message Gas Komposisi',
+							items	: griddetailmessage2
+						},
+						{
+							xtype : 'panel',					
+							//autoScroll : true,
+							//region : 'south',
+							//frame	: true,
+							//border	: false,					
+							title : 'Data Pendukung',					
+							layout: 'fit',					
+							flex: 1,
+							items	: griddokumenpendukungs
+						}]
+					}]
+				},
+				{
+					title		: 'Taksasi',
+					layout		: 'fit',
+					autoScroll 	: true,
+					id	  		: 'gridtaksasi',
+					items		: gridtaksasi
+				}]
+			},
+			
+			]
+        });
+        tabPanel.setActiveTab('1anomali');
+		//Ext.Msg.hide();
+    }
+}

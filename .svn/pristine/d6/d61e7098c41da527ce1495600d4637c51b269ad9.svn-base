@@ -1,0 +1,131 @@
+.copyright {
+ font : 8pt Tahoma;
+}
+
+.topcopyright {
+ font : 8pt Tahoma;
+ COLOR : #ffffff;
+}
+
+a {
+ font : 10pt Tahoma;
+ COLOR : #2b4a7f;
+ FONT-WEIGHT : bold;
+ TEXT-DECORATION : none;
+}
+
+a:hover {
+ font : 10pt Tahoma;
+ COLOR : #283e66;
+ FONT-WEIGHT : bold;
+ TEXT-DECORATION : underline;
+}
+
+.nav {
+ font : 9pt Tahoma;
+ COLOR : white;
+ FONT-WEIGHT : bold;
+ TEXT-DECORATION : none;
+}
+
+.nav:hover {
+ font : 9pt Tahoma;
+ COLOR : black;
+ FONT-WEIGHT : bold;
+ TEXT-DECORATION : underline;
+}
+
+.bottomnav {
+ font : 10pt Tahoma;
+ COLOR : black;
+ FONT-WEIGHT : bold;
+ TEXT-DECORATION : none;
+}
+
+.bottomnav:hover {
+ font : 10pt Tahoma;
+ COLOR : black;
+ FONT-WEIGHT : bold;
+ TEXT-DECORATION : underline;
+}
+
+.txtbody
+{
+  font : 10pt Tahoma;
+  vertical-align: top ;
+  height:100%;
+  width :100%;
+}
+
+.right {
+ font : 9pt Tahoma;
+ COLOR : black;
+ FONT-WEIGHT : bold;
+ padding-left : 8px;
+ padding-right : 6px;
+ text-align : center; 
+}
+
+.tit {
+ font : 12pt Tahoma;
+ COLOR : black;
+ FONT-WEIGHT : bold;
+ padding-left : 8px;
+ padding-right : 6px;
+ margin-left : 6px;
+ margin-right : 4px;
+ height : 20;
+ background-color : #e2e2e2;
+}
+
+
+td.title {
+ font : 9pt Tahoma;
+ COLOR : white;
+ FONT-WEIGHT : bold;
+ TEXT-DECORATION : none;
+ text-align : center; 
+ height : 18; 
+ background-color : #2b4a7f;
+}
+
+td.down{
+ font : 10pt Tahoma;
+ }
+
+th.down{
+ font : 10pt Tahoma;
+ FONT-WEIGHT : bold;
+ }
+
+
+a.copyright {
+ font : 8pt Tahoma;
+ COLOR : black;
+ TEXT-DECORATION : none;
+}
+
+a.copyright:hover {
+ font : 8pt Tahoma;
+ COLOR : black;
+ TEXT-DECORATION : underline;
+}
+
+PRE{
+ font : 10pt Curier;
+ }
+
+.pagetitle {
+ font : 18pt Verdana; 
+ color : #ffffff; 
+ FONT-WEIGHT : bold;
+ FONT-style: italic;
+
+}
+
+.pageheader
+{
+ background-color : #2b4a7f;
+ background-repeat: no-repeat;
+ background-position:top left
+}

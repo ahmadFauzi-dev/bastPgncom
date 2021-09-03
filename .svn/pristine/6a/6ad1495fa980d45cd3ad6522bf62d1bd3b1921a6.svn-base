@@ -1,0 +1,92 @@
+function apps(name, iconCls) {
+
+	var grid 				= Ext.create('analisa.offtake.view_gaskomp.gridvalidkomp');
+	var formsearch 			= Ext.create('analisa.offtake.view_gaskomp.formsearchvalidkomp');
+	//var griddetailmessage	= Ext.create('analisa.offtake.view.griddetailmessage');
+	
+	var tabPanel = Ext.getCmp('contentcenter');
+	tabPanel.items.each(function(c){
+		if (c.title != 'Home') {
+			tabPanel.remove(c.id);
+		}
+	});
+	var items = tabPanel.items.items;
+    var exist = false;
+	
+	if (!exist) {
+		tabPanel.add({
+            title: name,
+            id: Init.idmenu+'gaskompvalid',
+            xtype: 'panel',
+            iconCls: iconCls,
+            closable: true,
+            layout: 'border',
+			setLoading	: true,
+            // overflowY	: 'scroll',
+            defaults: {
+                collapsible: true,
+                split: true,
+                //bodyStyle: 'padding:5px'
+            },
+            // bodyPadding: '5 5 0',
+            items: [{
+                xtype: 'panel',
+                title: 'Form Search',
+                flex: 1,
+				id : 'searchanomaliform',
+                region: 'west',
+                // layout 		: 'fit',
+                bodyStyle: 'padding:5px',
+				items	 : formsearch
+            }, {
+                xtype: 'tabpanel',
+                flex: 3,
+				id : 'tabamr',
+                collapsible: false,				
+                region: 'center',
+				activeTab	: 0,				
+				fit		: true,							
+				items	: [{
+					xtype	: 'panel',
+					title  : name,
+					frame: true,	
+					iconCls 	: 'application_view_gallery',
+					layout: 'border',
+					defaults: {
+						collapsible: true,
+						split: true,
+						//bodyStyle: 'padding:5px'
+					},
+					items	: [
+					{
+						xtype		: 'panel',
+						region 		: 'center',
+						flex		: 3,
+						layout		: 'fit',
+						title  		: name,
+						frame		: true,
+						id			: 'gridpenyaluran',
+						iconCls 	: 'application_view_gallery',
+						items		: grid
+						//items		: gridanomali
+					},			
+					{
+						xtype : 'panel',					
+						autoScroll : true,
+						region : 'south',
+						frame	: true,
+						border	: false,					
+						title : 'Data Pendukung',					
+						layout: 'fit',					
+						flex: 1
+						//items	: griddokumenpendukungs
+						//items : gridvolumehourly
+					
+					}]
+				}]
+                //items: [ gridkelamr ]
+            }]
+        });
+        tabPanel.setActiveTab(Init.idmenu+'gaskompvalid');
+	 }	
+}

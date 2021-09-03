@@ -1,0 +1,95 @@
+Ext.define('simpel.surat_keluar.gridfklasifikasi' ,{
+			extend: 'Ext.tree.Panel',
+			initComponent	: function()
+			{
+			var pageId = Init.idmenu;
+			var msclass = Ext.create('master.global.geteventmenu'); 
+			
+			var gmodel 			=  msclass.getmodel('v_klasifikasi');			
+			var listklasifikasiGrid 	=  msclass.gettreestore(gmodel,'v_klasifikasi',[]);
+			listklasifikasiGrid.getProxy().extraParams = {
+										view :'v_klasifikasi',	
+										limit : "All",
+										"filter[0][field]" : "id_perusahaan",
+										"filter[0][data][type]" : "string",
+										"filter[0][data][comparison]" : "eq",
+										"filter[0][data][value]" : 'MD298'
+			};
+			listklasifikasiGrid.reload();
+								
+			Ext.apply(this,{
+				rootVisible : false,
+				//title : 'klasifikasi',
+				id		: 'gridfklasifikasi'+pageId,
+				store: listklasifikasiGrid,
+				dockedItems: [{
+					xtype: 'fieldcontainer',
+					fieldLabel: 'Cari',
+					layout: 'hbox',
+					items: [{
+						xtype     : 'textfield',
+						grow      : true,
+						width : 150,
+						flex : 1,
+						id : 'cari'+pageId,
+					},
+					{
+						xtype: 'button',
+						text: 'Cari',
+						flex : 3,
+						//tooltip: 'Generate a random password',
+						style: 'margin-left: 4px;',
+						flex: 0,
+						handler: function() {
+							    
+								var value = Ext.getCmp('cari'+pageId).getValue();
+								var gridfklasifikasi = Ext.getCmp('gridfklasifikasi'+pageId).getStore();
+								gridfklasifikasi.getProxy().extraParams = {
+															view :'v_klasifikasi',	
+															"filter[0][field]" : "id_perusahaan",
+															"filter[0][data][type]" : "string",
+															"filter[0][data][comparison]" : "eq",
+															"filter[0][data][value]" : 'MD298',															
+															"filter[1][field]" : "name",
+															"filter[1][data][type]" : "string",
+															"filter[1][data][comparison]" : "",
+															"filter[1][data][value]" : value
+								};
+								gridfklasifikasi.load();
+						}
+					}]
+				}],
+				columns		: [
+				{
+					xtype	: 'actioncolumn',
+					text		:'Pilih',
+					align		: 'center',
+					items	: [{
+						icon		: ''+base_url+'asset/ico/13.ico',
+						tooltip 	: 'Pilih',
+						width 	: 20,
+						align 	: 'center',
+						handler  : function(grid, rowIndex, colIndex)
+						{
+							var rec = grid.getStore().getAt(rowIndex);
+							var code = rec.get('code');	
+							Ext.getCmp('klasifikasi'+pageId).setValue(code);
+							Init.winss_gridfklasifikasi.close();
+						}
+					}]
+				},
+				{
+					xtype	: 'treecolumn',
+					text		: 'Nama klasifikasi',
+					dataIndex	: 'name',
+					width		: 300				
+				},
+				{
+					text		: 'Code',
+					align		:'left',
+					dataIndex	: 'code',
+				}]
+			});
+			this.callParent(arguments);
+			}
+		})

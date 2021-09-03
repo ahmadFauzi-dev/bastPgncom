@@ -1,0 +1,54 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Download extends CI_Controller {
+
+	function __construct() {		
+        parent::__construct();        
+    }
+	
+	public function index ()
+	{
+		
+	}
+	
+	public function excel_anomali ()
+	{
+		$objPHPExcel = new PHPExcel();
+		//set properties
+		$objPHPExcel->getProperties()->setCreator("SIPG-EM")
+								->setLastModifiedBy("System")
+								->setTitle("Data Anomali")
+								->setSubject("Data Anomali")
+								->setDescription("Report Data Anomali");
+								
+								
+		
+ 
+		//set Sheet yang akan diolah 
+		$objPHPExcel->setActiveSheetIndex(0)
+				//mengisikan value pada tiap-tiap cell, A1 itu alamat cellnya 
+				//Hello merupakan isinya
+									->setCellValue('A1', 'Hello')
+									->setCellValue('B2', 'Ini')
+									->setCellValue('C1', 'Excel')
+									->setCellValue('D2', 'Pertamaku');
+		//set title pada sheet (me rename nama sheet)
+		$objPHPExcel->getActiveSheet()->setTitle('Data Anomali');
+
+		//mulai menyimpan excel format xlsx, kalau ingin xls ganti Excel2007 menjadi Excel5          
+		$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+
+		//sesuaikan headernya 
+		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+		header("Cache-Control: no-store, no-cache, must-revalidate");
+		header("Cache-Control: post-check=0, pre-check=0", false);
+		header("Pragma: no-cache");
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		//ubah nama file saat diunduh
+		header('Content-Disposition: attachment;filename="DetailAnomali.xlsx"');
+		//unduh file
+		$objWriter->save("php://output");		
+	}
+
+
+}

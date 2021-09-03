@@ -1,0 +1,83 @@
+Ext.define('analisa.bulk.view.formuploaddokanomalihourly' ,{
+		extend: 'Ext.form.Panel',
+		alias : 'widget.formuploaddok',
+		initComponent: function() {		
+			
+			Ext.apply(this, {
+				xtype		: 'form',
+				fileUpload		: true,
+				id			: 'formuploaddokanomalihourly'+Init.idmenu+'',
+				border		: false,
+				url			: base_url+'admin/mapping/uploaddok',
+				frame		: false,
+				method	: 'POST',
+				items		: [{
+					xtype		: 'fieldset',
+					defaultType	: 'textfield',
+					title		: 'Tambah Company',
+					collapsible	: true,
+					fileUpload	: true,
+					layout		: 'anchor',
+					defaults: {
+						anchor: '100%'
+					},
+					items		: 
+					[			
+						{
+							fieldLabel	: 'Dokumen',
+							xtype		: 'fileuploadfield',
+							name		: 'dok',
+							allowBlank	: false
+						}					
+					]
+				}],
+				buttons	: [{
+					text		: 'Save',
+					formBind: true,
+					handler		: function()
+					{
+						
+						var grid = Ext.getCmp(''+Init.idmenu+'gridanomalihourly');
+						var storegridvalid = grid.getStore();
+						var items = [];
+						
+						storegridvalid.each(function(record){
+						  if(record.data.selectopts == true)
+						  {
+							items.push(record.data);		
+						  }
+						});
+						
+						var datasubmit = Ext.encode(items);
+						
+						this.up('form').getForm().submit({
+							params: {
+									datagrid : datasubmit 
+							},
+							waitTitle	: 'Harap Tunggu',
+							waitMsg		: 'Insert data',
+							success	:function()
+							{
+								Ext.Msg.alert('Sukses','Penambahan Component Sukses');
+							},
+							failure:function(form, action)
+							{
+								console.log(action);
+								//Ext.Msg.alert('Warning!', 'Authentication server is unreachable : ' + action.response.responseText + "");
+							}
+						});
+					}
+				},
+				{
+					text		: 'Cancel',
+					handler		: function()
+					{
+						this.up('.window').close();
+						//winaddcompany.close();
+					}			
+				}]
+		});
+
+		this.callParent(arguments);
+	}
+	});

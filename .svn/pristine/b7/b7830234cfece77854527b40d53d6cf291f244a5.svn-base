@@ -1,0 +1,283 @@
+function apps(name, iconCls){
+	var valuesimpan;
+	Ext.define('Init', {
+			valuesimpan
+	});
+	 
+	//====================| FRAMEWORK |===============================================
+	
+		var msclass 						= Ext.create('master.global.geteventmenu');
+		var pageId = Init.idmenu;
+		var v_table = "v_tasksuratkeluar"; 
+		var winimp;
+		var model_data = msclass.getmodel(v_table);
+		 model_data.push('selectopts');
+		var pstore = msclass.getstore(model_data,v_table,[]);
+		pstore.getProxy().extraParams = {
+						view :'v_suratkeluar',
+						limit : 'All'
+		};		
+		pstore.load();
+		
+		var cgrid = msclass.getcolumngrid('idgrid_msuratkeluar',v_table);	
+		cgrid[0] = {
+				text	: 'Status',
+				width : 100,
+				align	: 'left',
+				dataIndex : cgrid[0].dataIndex,
+				renderer: function(val, meta, record, rowIndex){
+					var reffstatus			= record.data.reffstatus;
+					var nama_status	= record.data.nama_status;
+					//return reffstatus;
+					switch (reffstatus){
+						default:
+							return '<img src="'+base_url+'asset/ico/51.ico" /> '+nama_status;
+						break;
+						
+						case 'MD320':
+							return '<img src="'+base_url+'asset/ico/38.ico" /> '+nama_status;
+						break;
+						
+						case 'MD321':
+							return '<img src="'+base_url+'asset/ico/59.ico" /> '+nama_status;
+						break;
+						
+						case 'MD322':
+							return '<img src="'+base_url+'asset/ico/42.ico" /> '+nama_status;
+						break;
+						case 'MD411':
+							return '<img src="'+base_url+'asset/ico/33.ico" /> '+nama_status;
+						break;
+					}
+				}
+		};
+		
+		var itemdocktop = [{
+			text	: 'Buka',
+			iconCls	: 'application_form_magnify',
+			handler	: function()
+			{
+				var grid = Ext.getCmp('idgrid_msuratkeluar');				
+				var storegrid = grid.getStore();
+				storegrid.each(function(record){ 
+				  //console.log(record.data);
+				});
+				
+				var record 	= grid.getView().getSelectionModel().getSelection()[0]; 
+				var sk_id = record.get('rowid');
+				var refftujuansurat = record.get('refftujuansurat');
+				//console.log(refftujuansurat);
+				if (sk_id){
+					if(!Init.winss_formsuratkeluardetail)
+					{
+						var formsuratkeluardetail = Ext.create('simpel.surat_keluar.formsuratkeluardetail');
+						Init.winss_formsuratkeluardetail = Ext.widget('window', {
+							closeAction	: 'hide',
+							width: 700,
+							height	: 600,
+							autoScroll	:true,
+							//id			: ''+Init.idmenu+'winmapppelsource',
+							resizable	: true,
+							modal		: true,
+							bodyPadding	: 5,
+							layout		: 'fit',
+							items		: formsuratkeluardetail
+						});
+						Ext.getCmp('formsuratkeluardetails'+pageId).getForm().reset();
+					}
+					Init.winss_formsuratkeluardetail.show();
+					
+					var myField 	= Ext.getCmp('formsuratkeluardetails'+pageId);
+					var form_data 	= myField.getForm();
+					form_data.loadRecord(record);
+					
+					//console.log()
+					if(refftujuansurat == 'MD323'){
+						Ext.getCmp('vtujuan_internalskd'+pageId).show();									
+						Ext.getCmp('vtujuan_externalskd'+pageId).hide();
+						Ext.getCmp( 'vtembusan_externalskd'+pageId).hide();
+						
+					}
+					else{
+						Ext.getCmp('vtujuan_internalskd'+pageId).hide();									
+						Ext.getCmp('vtujuan_externalskd'+pageId).show();
+						Ext.getCmp( 'vtembusan_externalskd'+pageId).show();
+					}
+					
+					var storewf = Ext.getCmp('gridtujuaninternalskdetail').getStore();
+					storewf.getProxy().extraParams = {
+						view :'tbl_tujuaninternal',
+						limit : 'All',
+						"filter[0][field]" : "reffsurat",
+						"filter[0][data][type]" : "string",
+						"filter[0][data][comparison]" : "eq",
+						"filter[0][data][value]" : sk_id			
+					};
+					storewf.reload();
+					
+					var storewf = Ext.getCmp('gridworkflowdetailskdetail'+pageId).getStore();
+					storewf.getProxy().extraParams = {
+						view :'v_workflowdetail',
+						limit : 'All',
+						"filter[0][field]" : "refftransaction",
+						"filter[0][data][type]" : "string",
+						"filter[0][data][comparison]" : "eq",
+						"filter[0][data][value]" : sk_id			
+					};
+					storewf.reload();
+					
+					var storead = Ext.getCmp('gridattdokumenskdetail'+pageId).getStore();
+					storead.getProxy().extraParams = {
+						view :'tbl_attdokumen',
+						limit : 'All',
+						"filter[0][field]" : "reffsurat",
+						"filter[0][data][type]" : "string",
+						"filter[0][data][comparison]" : "eq",
+						"filter[0][data][value]" : sk_id,
+						"filter[1][field]" : "active",
+						"filter[1][data][type]" : "string",
+						"filter[1][data][comparison]" : "eq",
+						"filter[1][data][value]" : 'Y'
+					};
+					storead.reload();
+					
+					var storetmb = Ext.getCmp('gridtembusanskdetail'+pageId).getStore();
+					storetmb.getProxy().extraParams = {
+						view :'tbl_tembusan',
+						limit : 'All',
+						"filter[0][field]" : "reffsurat",
+						"filter[0][data][type]" : "string",
+						"filter[0][data][comparison]" : "eq",
+						"filter[0][data][value]" : sk_id
+					};
+					storetmb.reload();
+				}
+			}
+		},
+		{
+			text	: 'Cancel',
+			iconCls	: 'application_edit',
+			handler	: function()
+			{
+				var grid = Ext.getCmp('idgrid_msuratkeluar');	
+				var record 	= grid.getView().getSelectionModel().getSelection()[0]; 
+				var rowid = record.get('rowid');
+				if (rowid){
+					if(!Init.winss_formsuratkeluardetail)
+					{
+						var formcancel = Ext.create('simpel.monitoring.formactioncancel');
+						Init.winss_cancel = Ext.widget('window', {
+							closeAction	: 'hide',
+							width: 500,
+							height	: 300,
+							autoScroll	:true,
+							//id			: ''+Init.idmenu+'winmapppelsource',
+							resizable	: true,
+							modal		: true,
+							bodyPadding	: 5,
+							layout		: 'fit',
+							items		: formcancel
+						});
+						Ext.getCmp('formactioncancel').getForm().reset();
+					}
+					Init.winss_cancel.show();
+				}
+			}
+		}]
+		
+		var pgrid  = msclass.getgridpeng(cgrid,'idgrid_msuratkeluar',itemdocktop,pstore);
+		var f_items    = msclass.getitemsform(v_table,'idform_srcsuratkeluar');
+		f_items[0].id = 'reffstatussrcgsk';
+        var pformsearch = msclass.getformsearchpeng1(f_items);
+		
+		
+	   var get_toolbar =  [];
+	   
+		var stores = Ext.getCmp('reffstatussrcgsk').getStore().load();
+		stores.getProxy().extraParams = {
+									view :"fn_getdatamastertype('TOD38')",
+									limit : "All",
+									"filter[0][field]" : 'id',
+									"filter[0][data][type]" : 'list',
+									"filter[0][data][comparison]" : "",
+									"filter[0][data][value]" : 'MD329,MD319,MD320,MD321,MD322,MD411'
+		};
+		stores.reload(); 
+		var parms_pgrid = Ext.getCmp('idgrid_msuratkeluar').getStore();
+	//==================| SEARCH |======================================================
+	var fsearch =  Ext.create('Ext.form.Panel',{ 
+				xtype: 'form',
+				title: 'Form Search', 
+				flex: 1,
+				width	: 250,
+				id : 'searchlaporanstokitems',
+				region: 'west',
+				bodyStyle: 'padding:5px',
+				layout: {
+					type: 'vbox',
+					align : 'stretch',
+					pack  : 'start',
+				},
+				//tbar	:ptoolbar_search,
+				items	: [{
+					border	: false,
+					xtype: 'panel',
+					bodyStyle: 'padding:0 0 20px 0',
+					items : pformsearch,
+					buttons		: [{
+								text	: 'Search',
+								iconCls : 'magnifier',
+								handler	: function()
+									{
+										var findform = this.up('form').getForm();
+										var oksparams = findform.getValues();
+										console.log(oksparams);		
+										parms_pgrid.getProxy().extraParams = {
+												view :'public.v_tasksuratkeluar',
+												limit : "All",
+												"filter[0][field]" : 'reffstatus',
+												"filter[0][data][type]" : 'string',
+												"filter[0][data][comparison]" : "eq",
+												"filter[0][data][value]" : oksparams.reffstatus,
+												"filter[1][field]" : "klasifikasi",
+												"filter[1][data][type]" : 'string',
+												"filter[1][data][comparison]" : "",
+												"filter[1][data][value]" : oksparams.klasifikasi,
+												"filter[2][field]" : "tanggal_surat",
+												"filter[2][data][type]" : 'string',
+												"filter[2][data][comparison]" : "eq",
+												"filter[2][data][value]" : oksparams.tanggal_surat,
+												"filter[3][field]" : "create_date",
+												"filter[3][data][type]" : "date",
+												"filter[3][data][comparison]" : "gt",
+												"filter[3][data][value]" : oksparams.startt,
+												"filter[4][field]" : "create_date",
+												"filter[4][data][type]" : "date",
+												"filter[4][data][comparison]" : "lt",
+												"filter[4][data][value]" : oksparams.endd,
+												"filter[5][field]" : "perihal",
+												"filter[5][data][type]" : 'string',
+												"filter[5][data][comparison]" : "",
+												"filter[5][data][value]" : oksparams.perihal,
+												"filter[6][field]" : "reffjobpos", 
+												"filter[6][data][type]" : "string",
+												"filter[6][data][comparison]" : "eq",
+												"filter[6][data][value]" : sess_reffjabatan
+										};
+										parms_pgrid.reload(); 
+									}
+							},
+							{
+								text	: 'Reset',
+								iconCls : 'arrow_refresh',
+								handler	: function()
+								{
+									this.up('form').getForm().reset();
+								}
+							}
+					]
+				}
+			]
+	});
+	var layout = msclass.getlayout(pgrid,pformsearch,get_toolbar,iconCls,name,fsearch);		
+}

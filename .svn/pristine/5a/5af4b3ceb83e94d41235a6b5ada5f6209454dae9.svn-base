@@ -1,0 +1,425 @@
+function apps(name, iconCls){
+	var valuesimpan;
+	Ext.define('Init', {
+			valuesimpan
+	});
+	 
+	//====================|FRAMEWOR|===============
+	
+		var msclass 						= Ext.create('master.global.geteventmenu');
+		var pageId = Init.idmenu;
+		var v_table 	= "v_tasksuratmasuk";
+		//var winimp;
+		//model_data.push('selectopts');
+		var model_data = msclass.getmodel(v_table);
+		var pstore = msclass.getstore(model_data,v_table,[]);
+		pstore.getProxy().extraParams = {
+						view :'v_tasksuratmasuk',
+						"filter[0][field]" : "createby_tsm",
+						"filter[0][data][type]" : "string",
+						"filter[0][data][comparison]" : "eq",
+						"filter[0][data][value]" : username,
+						"filter[1][field]" : "type_sm",
+						"filter[1][data][type]" : "string",
+						"filter[1][data][comparison]" : "eq",
+						"filter[1][data][value]" : "VSR",
+						"filter[2][field]" : "reffjenis",
+						"filter[2][data][type]" : "string",
+						"filter[2][data][comparison]" : "eq",
+						"filter[2][data][value]" : "MD296",
+						"filter[3][field]" : "reffjabatan",
+						"filter[3][data][type]" : "string",
+						"filter[3][data][comparison]" : "eq",
+						"filter[3][data][value]" : sess_reffjabatan
+		};
+		
+		
+		pstore.load();
+		
+		var cgrid = msclass.getcolumngrid('idgrid_suratmasukexternal',v_table);	
+		cgrid[0] = {
+				text	: 'Status',
+				width : 100,
+				align	: 'left',
+				dataIndex : cgrid[0].dataIndex,
+				renderer: function(val, meta, record, rowIndex){
+					var reffstatus			= record.data.reffstatus;
+					var nama_status			= record.data.nama_status;
+					//return reffstatus;
+					switch (reffstatus){
+						default:
+							return '<img src="'+base_url+'asset/ico/38.ico" /> Complete';
+						break;
+						
+						case 'MD396':
+							return '<img src="'+base_url+'asset/ico/51.ico" /> Inproses';
+						break;
+					}
+				}
+		};
+		var itemdocktop = [{
+			text	: 'Buka',
+			iconCls	: 'application_form_magnify',
+			handler	: function()
+			{
+				 var grid = Ext.getCmp('idgrid_suratmasukexternal');				
+				var storegrid = grid.getStore();
+				storegrid.each(function(record){ 
+				  //console.log(record.data);
+				});
+				
+				var record 	= grid.getView().getSelectionModel().getSelection()[0];
+				
+				var preffsuratkeluarad;
+				Ext.define('Init', {
+					preffsuratkeluarad
+				});
+				
+				var sm_id = record.get('rowid');
+				var sk_id = record.get('reffsuratkeluar');
+				var refftujuansurat = record.get('refftujuansurat');
+				var reffjenis = record.get('reffjenis');
+				
+				//console.log(sk_id);
+				if (sm_id){			
+						switch(reffjenis){
+							case 'MD342' :
+								
+								var idformsm = 'formpenerimadisposisi';
+								
+								if(!Init.winss_formpenerimadisposisi)
+								{	
+									var formpenerimadisposisi = Ext.create('simpel.surat_masuk.formpenerimadisposisi');
+									Init.winss_formpenerimadisposisi = Ext.widget('window', {
+										closeAction	: 'hide',
+										width: 700,
+										height	: 600,
+										autoScroll	:true,
+										//id			: ''+Init.idmenu+'winmapppelsource',
+										resizable	: true,
+										modal		: true,
+										bodyPadding	: 5,
+										layout		: 'fit',
+										items		: formpenerimadisposisi
+									});
+								}
+								Ext.getCmp(idformsm+pageId).getForm().reset();
+								Init.winss_formpenerimadisposisi.show();
+								var storead = Ext.getCmp('gridattdokumensm').getStore();
+								storead.getProxy().extraParams = {
+									view :'tbl_attdokumen',
+									limit : 'All',
+									"filter[0][field]" : "reffsurat",
+									"filter[0][data][type]" : "string",
+									"filter[0][data][comparison]" : "eq",
+									"filter[0][data][value]" : sk_id,
+									"filter[1][field]" : "active",
+									"filter[1][data][type]" : "string",
+									"filter[1][data][comparison]" : "eq",
+									"filter[1][data][value]" : 'Y'
+								};
+								storead.reload();
+							break;
+							
+							case 'MD397':
+								
+								var idformsm = 'formtembusan';
+								if(!Init.winss_formtembusan)
+								{	
+									 var formtembusan = Ext.create('simpel.surat_masuk.formtembusan');
+									 Init.winss_formtembusan = Ext.widget('window', {
+										closeAction	: 'hide',
+										width: 700,
+										height	: 600,
+										autoScroll	:true,
+										//id			: ''+Init.idmenu+'winmapppelsource',
+										resizable	: true,
+										modal		: true,
+										bodyPadding	: 5,
+										layout		: 'fit',
+										items		: formtembusan
+									});
+								}							
+								Init.winss_formtembusan.show();
+								Ext.getCmp(idformsm+pageId).getForm().reset();
+								var storead = Ext.getCmp('gridattdokumensmtmb').getStore();
+								storead.getProxy().extraParams = {
+									view :'tbl_attdokumen',
+									limit : 'All',
+									"filter[0][field]" : "reffsurat",
+									"filter[0][data][type]" : "string",
+									"filter[0][data][comparison]" : "eq",
+									"filter[0][data][value]" : sk_id,
+									"filter[1][field]" : "active",
+									"filter[1][data][type]" : "string",
+									"filter[1][data][comparison]" : "eq",
+									"filter[1][data][value]" : 'Y'
+								};
+								storead.reload();
+							break;
+							default :
+								
+								var idformsm = 'formsuratmasukdetail';
+								if(!Init.winss_formsuratmasukdetail)
+								{	
+									var formsuratmasukdetail = Ext.create('simpel.surat_masuk.formsuratmasukdetail');
+									Init.winss_formsuratmasukdetail = Ext.widget('window', {
+															closeAction	: 'hide',
+															width: 700,
+															height	: 600,
+															autoScroll	:true,
+															//id			: ''+Init.idmenu+'winmapppelsource',
+															resizable	: true,
+															modal		: true,
+															bodyPadding	: 5,
+															layout		: 'fit',
+															items		: formsuratmasukdetail
+									});
+								}
+								Ext.getCmp(idformsm+pageId).getForm().reset();
+								var storead = Ext.getCmp('gridattdokumensm').getStore();
+								storead.getProxy().extraParams = {
+									view :'tbl_attdokumen',
+									limit : 'All',
+									"filter[0][field]" : "reffsurat",
+									"filter[0][data][type]" : "string",
+									"filter[0][data][comparison]" : "eq",
+									"filter[0][data][value]" : sk_id,
+									"filter[1][field]" : "active",
+									"filter[1][data][type]" : "string",
+									"filter[1][data][comparison]" : "eq",
+									"filter[1][data][value]" : 'Y'
+								};
+								storead.reload();
+								Init.winss_formsuratmasukdetail.show();
+							break;
+						}
+						
+					
+					var myField 	= Ext.getCmp(idformsm+pageId);
+					var form_data 	= myField.getForm();
+					form_data.loadRecord(record);
+					
+				}
+			}
+		},
+		{
+			text	: 'Add',
+			iconCls	: 'application_add',
+			handler	: function()
+			{
+				
+				var form_addsuratmasuk = Ext.create('simpel.surat_masuk.form_addsuratmasuk');	
+				var tabPanel = Ext.getCmp('contentcenter');
+				
+				tabPanel.items.each(function(c){
+						if (c.id == 'suratmasukexternal') {
+							tabPanel.remove(c);
+						}
+				});
+				
+				
+				var exist = false;
+				if (!exist){
+					tabPanel.add({
+						title: 'Form Surat Masuk External',
+						id: 'suratmasukexternal',
+						xtype		: 'panel',
+						autoScroll: true,
+						iconCls		: 'application_form_add',
+						closable	: true,
+						frame 		: true,
+						layout		: 'border',
+						defaults: {
+							collapsible: false,
+							split: true
+						},
+						items		: 
+						[{
+								xtype	: 'panel',
+								region	: 'north',
+								//flex	: 2,
+								//width:400,
+								layout	: 'fit',
+								//id:'searchlistkaryawan',
+								//collapsible: true,
+								collapsed :false,
+								title	: 'Form Surat Masuk External',
+								items : form_addsuratmasuk	
+						}]	
+					});
+					Ext.getCmp('form_addsuratmasuk').getForm().reset();
+				}
+				tabPanel.setActiveTab('suratmasukexternal');
+				
+				var storedoc = Ext.getCmp('gridattdokumenaddsm').getStore();
+				storedoc.getProxy().extraParams = {
+						view :'public.tbl_attdokumen',
+						limit : "All",												
+						"filter[0][field]" : "reffsurat",
+						"filter[0][data][type]" : 'string',
+						"filter[0][data][comparison]" : "",
+						"filter[0][data][value]" : '',
+				};
+				storedoc.load();
+			
+			}
+		},
+		{
+			text	: 'Edit',
+			iconCls	: 'application_edit',
+			handler	: function()
+			{
+				
+				
+				var grid = Ext.getCmp('idgrid_suratmasukexternal');
+				var record 	= grid.getView().getSelectionModel().getSelection()[0];
+				
+				var preffsuratkeluar = record.get('reffsuratkeluar');
+				
+				var form_addsuratmasuk = Ext.create('simpel.surat_masuk.form_addsuratmasuk');	
+				var tabPanel = Ext.getCmp('contentcenter');
+				
+				tabPanel.items.each(function(c){
+						if (c.id == 'suratmasukexternal'){
+							tabPanel.remove(c);
+						}
+				});
+						
+				var exist = false;
+				if (!exist){
+					tabPanel.add({
+						title: 'Form Surat Masuk External',
+						id: 'suratmasukexternal',
+						xtype		: 'panel',
+						autoScroll: true,
+						iconCls		: 'application_edit',
+						closable	: true,
+						frame 		: true,
+						layout		: 'border',
+						defaults: {
+							collapsible: false,
+							split: true
+						},
+						items		: 
+						[{
+								xtype	: 'panel',
+								region	: 'north',
+								//flex	: 2,
+								//width:400,
+								layout	: 'fit',
+								//id:'searchlistkaryawan',
+								//collapsible: true,
+								collapsed :false,
+								title	: 'Form Surat Masuk External',
+								items : form_addsuratmasuk	
+						}]	
+					});
+					Ext.getCmp('form_addsuratmasuk').getForm().reset();
+				}
+				
+				var myField 	= Ext.getCmp('form_addsuratmasuk');
+				var form_data 	= myField.getForm();
+				form_data.loadRecord(record);
+				
+				tabPanel.setActiveTab('suratmasukexternal');
+				
+				var storedoc = Ext.getCmp('gridattdokumenaddsm').getStore();
+				storedoc.removeAll();
+			}
+		}]
+		
+		var pgrid  = msclass.getgridpeng(cgrid,'idgrid_suratmasukexternal',itemdocktop,pstore);
+		var f_items    = msclass.getitemsform(v_table,'idform_srcsuratmasukexternal');
+		var pformsearch = msclass.getformsearchpeng1(f_items);
+		
+		
+	   var get_toolbar =  [];
+	   
+		
+	//==================| SEARCH |======================================================
+	var parms_pgrid = Ext.getCmp('idgrid_suratmasukexternal').getStore();
+	var fsearch =  Ext.create('Ext.form.Panel',{ 
+				xtype: 'form',
+				title: 'Form Search', 
+				flex: 1,
+				width	: 250,
+				id : 'searchgridsuratmasuk',
+				region: 'west',
+				bodyStyle: 'padding:5px',
+				layout: {
+					type: 'vbox',
+					align : 'stretch',
+					pack  : 'start',
+				},
+				//tbar	:ptoolbar_search,
+				items	: [{
+					border	: false,
+					xtype: 'panel',
+					bodyStyle: 'padding:0 0 20px 0',
+					items : pformsearch,
+					buttons		: [{
+								text	: 'Search',
+								iconCls : 'magnifier',
+								handler	: function()
+									{
+										var findform = this.up('form').getForm();
+										var oksparams = findform.getValues();
+										//console.log(oksparams);
+									    var parms_pgrid = Ext.getCmp('idgrid_suratmasukexternal')
+										parms_pgrid.getProxy().extraParams = {
+												view :'public.v_tasksuratmasuk',
+												limit : "All",
+												
+												"filter[0][field]" : "satuan_kerja",
+												"filter[0][data][type]" : 'string',
+												"filter[0][data][comparison]" : "",
+												"filter[0][data][value]" : oksparams.satuan_kerja,
+												
+												"filter[1][field]" : "no_surat",
+												"filter[1][data][type]" : 'string',
+												"filter[1][data][comparison]" : "",
+												"filter[1][data][value]" : oksparams.no_surat,
+												
+												"filter[2][field]" : "waktu_terima",
+												"filter[2][data][type]" : "date",
+												"filter[2][data][comparison]" : "gt",
+												"filter[2][data][value]" : oksparams.startt,
+												
+												"filter[3][field]" : "waktu_terima",
+												"filter[3][data][type]" : "date",
+												"filter[3][data][comparison]" : "lt",
+												"filter[3][data][value]" : oksparams.endd,
+												
+												"filter[4][field]" : "perihal",
+												"filter[4][data][type]" : 'string',
+												"filter[4][data][comparison]" : "",
+												"filter[4][data][value]" : oksparams.perihal,
+												
+												"filter[5][field]" : "reffjabatan",
+												"filter[5][data][type]" : "string",
+												"filter[5][data][comparison]" : "eq",
+												"filter[5][data][value]" : sess_reffjabatan,
+												
+												"filter[6][field]" : "reffstatus",
+												"filter[6][data][type]" : "string",
+												"filter[6][data][comparison]" : "eq",
+												"filter[6][data][value]" : 'MD395'
+										};
+										parms_pgrid.load(); 
+									}
+							},
+							{
+								text	: 'Reset',
+								iconCls : 'arrow_refresh',
+								handler	: function()
+								{
+									this.up('form').getForm().reset();
+								}
+							}
+					]
+				}
+			]
+	});
+	var layout = msclass.getlayout(pgrid,pformsearch,get_toolbar,iconCls,name,fsearch);		
+}

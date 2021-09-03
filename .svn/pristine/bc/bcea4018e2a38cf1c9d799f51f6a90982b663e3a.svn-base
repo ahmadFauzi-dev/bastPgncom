@@ -1,0 +1,887 @@
+Ext.define('analisa.view.gridvalidamr' ,{
+	extend: 'Ext.panel.Panel',    
+	initComponent	: function()
+	{
+		
+		var gridrejecto = Ext.create('analisa.view.rejecto');	
+		var msclass = Ext.create('master.global.geteventmenu'); 
+		var event = Ext.decode(msclass.getevent(Init.idmenu));
+		
+		var modelGridamrDaily = Ext.define('modelGridamrDaily',{
+			extend	: 'Ext.data.Model',
+			fields	: ['keyid','id_pel','namapel','sbu','area','tanggal','stat','selisih_cm',
+			'stream','selectopts','approved','reffamralertid', 'fmonth','fyear', 'fdatetime',
+			'reffidamrbridgedaily', 'fdate', 'field', 'kategori','selisih_un','keterangan',
+			{name : 'fdvm', usefield:'Y'},
+			{name : 'fdvc', usefield:'Y'},
+			{name : 'fp', usefield:'Y'},
+			{name : 'ft', usefield:'Y'},
+			{name : 'fvm', usefield:'Y'},
+			{name : 'fvc', usefield:'Y'},
+			{name : 'fcf', usefield:'Y'},
+			{name : 'fmc', usefield:'Y'},
+			{name : 'fmn', usefield:'Y'},
+			{name : 'fsg', usefield:'Y'},
+			{name : 'pbase', usefield:'Y'},
+			{name : 'tbase', usefield:'Y'},
+			{name : 'pmax', usefield:'Y'},
+			{name : 'pmin', usefield:'Y'},
+			{name : 'qmax', usefield:'Y'},
+			{name : 'qmin', usefield:'Y'},
+			{name : 'tmax', usefield:'Y'},
+			{name : 'tmin', usefield:'Y'},
+			{name : 'qbase_max', usefield:'Y'},
+			{name : 'qbase_min', usefield:'Y'},
+			'rdcode','areacode','credate','creperson'
+			]
+		});		
+		
+		// var showDetailOK = 0;		
+		// var shide = ' ';
+
+		
+		//var filter = [];
+		//Init.storeex =  msclass.getstore(modelGridamrDaily,'temp_amr_bridge_daily',filter);
+		//var getfieldsmodel = Ext.getModel('modelGridamrDaily');
+		//console.log(getfieldsmodel);
+		var storeGridamrDaily = Ext.create('Ext.data.JsonStore',{
+			model	: 'modelGridamrDaily',
+			remoteSort : true,
+			storeId: 'storeGridamrDailyas',
+			proxy: {
+				type: 'pgascomProxy',			
+				url: base_url+'analisa/findamrvalid',
+				reader: {
+					type: 'json',				
+					root: 'data'
+				}			
+			}
+		});			
+		//var User = Ext.ModelManager.getModel('modelGridamrDaily');
+		var a = modelGridamrDaily.getFields();
+		var abc = [];
+		Ext.each(a, function(record, index) {
+		  if (record.usefield == 'Y'){
+			// console.log(record.name);
+			abc.push({name : record.name});
+		  }
+		  //var cylon = (index + 1) % 2 == 0; //every second man is a toaster
+		  //alert(person + (cylon ? ' is ' : ' is not ') + 'a fraking cylon');
+		  //itemsfields.push(record.name);
+		});
+		
+		// console.log(abc);
+		
+		// Init.storeComboField = Ext.create('Ext.data.Store',{
+			// fields : ['name'],
+			// data   : abc
+		// });
+		
+		// console.log(Init.storeComboField);		
+		
+		storeGridamrDaily.load();
+		
+		Ext.define('modelValidateHourlyDetail',{
+			extend	: 'Ext.data.Model',
+			fields	: ['id_pel','namapel','sbu','area','tanggal','stream','selectopts','approved',
+			'stat',
+			'h00','h01','h02','h03','h04','h05','h06','h07','h08',
+			'h09','h10','h11','h12','h13','h14','h15','h16','h17',
+			'h18','h19','h20','h21','h22','h23','total','total_hourly','daily']
+		});		
+
+		var storeGridHourlyValidate = Ext.create('Ext.data.JsonStore',{
+			model	: 'modelValidateHourlyDetail',
+			storeId: 'validateStoredetail',
+			proxy: {
+				type: 'pgascomProxy',			
+				url: base_url+'analisa/showhourlyvalidate',
+				reader: {
+					type: 'json',				
+					root: 'data'
+				}			
+			}
+		});			
+		
+		
+		var gridDetailHourlyValidate = Ext.create('Ext.grid.Panel',{
+		store	: storeGridHourlyValidate,
+		loadMask: true, 
+		id		: 'gridHourlyValidate',		
+		columns		: [			
+			Ext.create('Ext.grid.RowNumberer',
+					{
+						header: 'No', 
+						width: 40
+					}
+			),
+			{
+				text	: 'No Reff',
+				locked   : true,
+				width		: 100,
+				cls   : 'header-cell',				
+				dataIndex	: 'id_pel'
+			},
+			{
+				text	: 'Nama Pelanggan',
+				locked   : true,
+				width		: 100,
+				cls   : 'header-cell',				
+				dataIndex	: 'namapel'
+			},			
+			{
+				text	: 'Stream',
+				width		: 50,
+				cls   : 'header-cell',
+				locked   : true,
+				dataIndex	: 'stream'
+			},
+			{
+				text	: 'Volume',
+				align	: 'center',
+				columns  : [
+				
+				{
+					text : '00',
+					type : 'float',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h00'
+				},
+				
+				{
+					text : '01',					
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					type	: 'float',					
+					dataIndex	: 'h01'
+				},
+				{
+					text : '02',
+					type	: 'float',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h02'
+				},
+				{
+					text : '03',
+					type	: 'float',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h03'
+				},
+				{
+					text : '04',
+					type	: 'float',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h04'
+				},
+				{
+					text : '05',
+					type	: 'float',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h05'
+				},
+				{
+					text : '06',
+					type	: 'float',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h06'
+				},
+				{
+					text : '07',
+					type	: 'float',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h07'
+				},
+				{
+					text : '08',
+					type	: 'float',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h08'
+				},
+
+				{
+					text : '09',
+					type	: 'float',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h09'
+				},
+				{
+					text : '10',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h10'
+				},
+				{
+					text : '11',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h11'
+				},
+				{
+					text : '12',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h12'
+				},
+				{
+					text : '13',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h13'
+				},
+				{
+					text : '14',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h14'
+				},
+				{
+					text : '15',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h15'
+				},
+				{
+					text : '16',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h16'
+				},
+
+				{
+					text : '17',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h17'
+				},
+				{
+					text : '18',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h18'
+				},
+				{
+					text : '19',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h19'
+				},
+				{
+					text : '20',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h20'
+				},
+				{
+					text : '21',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h21'
+				},
+				{
+					text : '22',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h22'
+				},
+				{
+					text : '23',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h23'
+				}				
+				]				
+			},
+			{
+				text	: 'Total',
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'total_hourly'
+			},			
+			{
+				text	: 'Daily',
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'daily'
+				
+			}			
+		]
+		
+		});
+		
+		var gridDataValidate = Ext.create('Ext.grid.Panel',
+		{	
+		loadMask: true, 
+		multiSelect	: true,
+		selType		: 'checkboxmodel',
+		selModel: {
+				injectCheckbox: 0,
+				pruneRemoved: false,
+				showHeaderCheckbox: false
+			},		
+		store		: storeGridamrDaily,
+		id			: 'gridValidateAmr',		
+		dockedItems: [
+		{
+			xtype: 'toolbar',
+			items: [
+				{
+					iconCls : 'accept',					
+					text	: 'Approve',
+					hidden	: event.p_approve,
+					menu 	: {
+						items	: [{
+							text	: 'Approve All',
+							handler	: function()
+							{								
+								var extraparams = storeGridamrDaily.proxy.extraParams;
+								//console.log(storeGridamrDaily);
+								extraparams.limit = storeGridamrDaily.pageSize;
+								extraparams.start = parseInt(storeGridamrDaily.currentPage) - 1;
+								extraparams.stat  = 2;
+								
+									console.log(storeGridamrDaily);
+									console.log(extraparams);
+									extraparams.id = 'gridValidateAmr';
+								var url = base_url+'analisa/updateapprovalAll';
+								msclass.savedata(extraparams,url);
+								
+								//msclass.savedata(extraparams,url);
+								/*
+								Ext.Ajax.request({ 
+									url			: base_url+'analisa/updateapprovalAll',
+									method: 'POST',
+									params:extraparams,									
+									success: function(response,requst){
+										var message = Ext.decode(response.responseText);
+										// console.log(message.success);
+										if(message.success == false)
+										{
+											Ext.Msg.alert('Error','Data sudah di approve oleh user lain');
+										}else
+										{
+											Ext.Msg.alert('Sukses','Data Telah di Approve');
+											
+										}
+										storeGridamrDaily.removeAll();								
+										storeGridamrDaily.reload();						
+																				
+									},
+									failure: function(response,requst)
+									{
+										Ext.Msg.alert('Fail !','Input Data Gagal '+ response );
+									}	
+									
+								});
+								*/
+								
+							}
+						},
+						{
+							text	: 'Approve Selected',
+							handler	: function()
+							{								
+								var items = [];
+								storeGridamrDaily.each(function(record){
+									
+									if (record.data.selectopts == true)
+									{
+										items.push(record.data);
+									}
+								});
+								
+								
+								Ext.Ajax.request({ 
+									url			: base_url+'analisa/updateapproval',
+									method: 'POST',
+									params:{
+										data : Ext.encode(items)
+									},
+									success: function(response,requst){										
+										// console.log(response.responseText);
+										var message = Ext.decode(response.responseText);
+										// console.log(message.success);
+										if(message.success == false)
+										{
+											Ext.Msg.alert('Error','Data sudah di Approve oleh user lain');
+										}else
+										{
+											Ext.Msg.alert('Sukses','Data Telah di Approve');
+											
+										}
+										storeGridamrDaily.removeAll();								
+										storeGridamrDaily.reload();
+									},
+									failure: function(response,requst)
+									{										
+										Ext.Msg.alert('Fail !','Input Data Gagal '+response);	
+										
+									}										
+								});
+							}
+						}]
+					}
+	
+				},{
+					text: 'Reject',
+					iconCls : 'cancel',
+					hidden	: event.p_reject,
+					handler : function() 
+					{
+						
+							Ext.Msg.show({
+								 title:'Warning'
+								,msg:'Anda Yakin..?'
+								,buttons:Ext.Msg.YESNO
+								,callback:function(btn) {
+									if('yes' === btn) {
+										
+						Init.storeGridCopy = Ext.getCmp('gridrejecto').getStore();
+						var tabbbPanel = Ext.getCmp('TabAsikAja');
+						// tabbbPanel.remove('gridrejecto', true);
+						var items = [];
+						// var exist = false;
+						Init.storeGridCopy.removeAll();
+						storeGridamrDaily.each(function(record){
+							
+							if (record.data.selectopts == true)
+							{
+								// tabbbPanel.add(gridrejecto);
+								Init.storeGridCopy.add(record.copy());
+								// items.push(record.data);
+								//console.log(record.data);
+							}
+						});
+						
+						/* tabbbPanel.items.each(function(c){
+							if (c.title == 'AMR Reject') {
+								tabbbPanel.setActiveTab('gridrejecto');
+								exist = true;
+							} else {
+								exist = false;
+							}
+						}); */
+
+						storeGridamrDaily.removeAll();								
+						storeGridamrDaily.reload();				
+						
+						if (!Init.existtabreject) {							
+							tabbbPanel.add(gridrejecto);
+							tabbbPanel.child('#gridrejecto').tab.show();							
+							tabbbPanel.setActiveTab('gridrejecto');
+							Init.existtabreject = true;
+						} else {
+							tabbbPanel.child('#gridrejecto').tab.show();							
+							tabbbPanel.setActiveTab('gridrejecto');
+							
+						}
+						
+									}
+								}
+							});
+						
+						
+
+					}
+				},{
+					text	: 'Export',
+					hidden	: event.p_export,
+					iconCls : 'page_white_excel',
+					xtype : 'button',					
+					handler: function (){						
+						// console.log(Init.specialparams);
+						window.location.href = base_url+'analisa/toexcel?typeexport=Validate&filter='+Ext.encode(Init.specialparams);
+					}
+				}			
+			]
+		},
+		{
+			xtype: 'pagingtoolbar',
+			dock: 'bottom',
+			store: storeGridamrDaily,
+			displayInfo: true,
+			plugins : [Ext.create('Ext.ux.PagingToolbarResizer')]
+		}],			
+		columns		: [
+			Ext.create('Ext.grid.RowNumberer',
+					{
+						header: 'No', 
+						width: 40
+					}
+			),		
+			{
+				//autoSizeColumn : true,
+				dataIndex	: 'stat',
+				locked   : true,
+				text	: 'Status',
+				width		: 45,
+				align	: 'center',
+				renderer : function(value, metaData, record, rowIdx, colIdx, store, view){					
+					var color = '';
+					if(record.get('stat') == "2")
+					{
+						color = base_url+'asset/ico/green_indicator.ico';
+					}else if(record.get('stat') == "1")
+					{
+						color = base_url+'asset/ico/yellow_indicator.ico';
+					}else
+					{
+						color = base_url+'asset/ico/red_indicator.ico';
+					}
+					return '<div><img src='+color+' width="16px" height="16px"></div>';					
+				}
+			},
+			{
+				text	: 'RD',
+				locked   : true,
+				width	: 75,
+				cls   : 'header-cell',
+				dataIndex	: 'sbu'
+			},
+			{
+				text	: 'Area',
+				locked   : true,
+				width	: 95,
+				cls   : 'header-cell',
+				dataIndex	: 'area'
+			},	
+			{
+				text	: 'No Reff',
+				locked   : true,
+				width	: 100,
+				cls   : 'header-cell',
+				dataIndex	: 'id_pel'
+			},
+			{
+				text	: 'Nama Pelanggan',
+				locked   : true,
+				width	: 100,									
+				cls   : 'header-cell',
+				dataIndex	: 'namapel'
+			},
+			{
+				text	: 'Stream',
+				locked   : true,
+				align	: 'center',
+				width	: 50,
+				type	: 'int',				
+				dataIndex	: 'stream'
+			},		
+			{
+				text	: 'Tanggal',
+				locked   : true,
+				width		: 70,
+				cls   : 'header-cell',
+				align	: 'right',
+				//type	: 'date',
+				dataIndex	: 'tanggal'
+			},
+			{
+				text	: 'Volume <br />(m3)',				
+				width	: 100,
+				cls   	: 'header-cell',
+				align	: 'right',
+				type	: 'float',
+				dataIndex	: 'fdvc'
+			},			
+			{
+				text	: 'P <br />(Bar-A)',				
+				width	: 100,
+				cls   	: 'header-cell',
+				align	: 'right',
+				type	: 'float',
+				dataIndex	: 'fp'
+
+			},
+			{
+				text	: 'T <br />(Celcius / Kelvin)',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				type	: 'float',
+				dataIndex	: 'ft'
+			},
+			{
+				text	: 'Corr.Fact',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				type	: 'float',
+				dataIndex	: 'fcf'
+			},
+			{
+				text	: 'C02 <br />(%)',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				type	: 'float',
+				dataIndex	: 'fmc'
+			},
+			{
+				text	: 'N2 <br />(%)',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				type	: 'float',
+				dataIndex	: 'fmn'
+			},			
+			{
+				text	: 'SG',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				type	: 'float',
+				dataIndex	: 'fsg'
+			},			
+			{
+				text	: 'Pb <br />(bar)',				
+				width		: 100,
+				cls   : 'header-cell',
+				type	: 'float',
+				align	: 'right',
+				dataIndex	: 'pbase'
+			},
+			{
+				text	: 'Tb <br />(Celcius / Kelvin)',				
+				width		: 100,
+				type	: 'float',
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'tbase'
+			},
+			{
+				text	: 'P.max <br />(bar)',				
+				width		: 100,
+				type	: 'float',
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'pmax'
+			},
+			{
+				text	: 'P.min <br />(bar)',				
+				width		: 100,
+				type	: 'float',
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'pmin'
+			},
+			{
+				text	: 'Q.max <br />(m3/jam)',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				type	: 'float',
+				dataIndex	: 'qmax'
+			},			
+			{
+				text	: 'Q.min <br />(m3/jam)',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				type	: 'float',
+				dataIndex	: 'qmin'
+			},				
+			{
+				text	: 'T.max <br />(Celcius / Kelvin)',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				type	: 'float',
+				dataIndex	: 'tmax'
+			},				
+			{
+				text	: 'T.min <br />(Celcius / Kelvin)',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				type	: 'float',
+				dataIndex	: 'tmin'
+			},	
+			{
+				text	: 'Vb Corr.Max <br />(m3/jam)',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				type	: 'float',
+				dataIndex	: 'qbase_max'
+			},	
+			{
+				text	: 'Vb Corr.Min <br />(m3/jam)',
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				type	: 'float',
+				dataIndex	: 'qbase_min'
+			},
+			{
+				text	: 'Created by',
+				width		: 100,
+				cls   : 'header-cell',
+				// align	: 'right',
+				// type	: 'float',
+				dataIndex	: 'creperson'
+			},
+			{
+				text	: 'Created date',
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				// type	: 'float',
+				dataIndex	: 'credate'
+			}
+			
+
+		],
+		listeners	: 
+		{
+			/* selectionchange: function (sm, records, options) {
+				var rec = records[0];
+				console.log('selectionchange fired '+ rec);
+			}, 
+			beforeselect: function(model, record, index, eOpts) {
+				if (record.data.stat == 0) {//replace this with your logic.
+					return false;
+				}
+			},*/
+			itemclick : function(model, record, index, eOpts)
+			{
+				// darecord = record.data ;
+				// storeGridAnomaliDetail.reload({params:{
+								// id : record.data.reffamralertid
+				// }});
+				storeGridHourlyValidate.removeAll();
+				storeGridHourlyValidate.reload({params:{
+								id_pel : record.data.id_pel,
+								tanggal : record.data.tanggal,
+								stream  : record.data.stream
+				}}				
+				);
+				
+				
+			},
+			select: function (model, record, index, eOpts) {
+				// console.log(record.data);
+				// dataselect = record.data;
+				
+				// storeGridAnomaliDetail.reload({params:{
+								// id : record.data.reffamralertid
+				// }});
+				
+				// if (showDetailOK === 1){
+				// storeGridHourlyValidate.removeAll();
+				// storeGridHourlyValidate.reload({params:{
+								// id_pel : record.data.id_pel,
+								// tanggal : record.data.tanggal,
+								// stream  : record.data.stream
+				// }}
+				// );
+				
+				// }
+				
+				record.set('approved',1);
+				record.set('selectopts',true);
+			},
+			deselect: function (view, record, item, index, e, eOpts) {
+				//console.log('deselect fired'+index);
+				//record.data.selectopts = false;
+				record.set('selectopts',false);
+			}
+			 
+		}		
+		}); 		
+		
+		
+		
+		// storeGridDaily.load();
+		Ext.apply(this,{
+			title  		: 'AMR Data Validate',			
+			frame: true,	
+			iconCls 	: 'application_view_gallery',
+			layout: 'border',
+			defaults: {
+                collapsible: true,
+                split: true,
+                //bodyStyle: 'padding:5px'
+            },
+			items: [
+				{
+					xtype : 'panel',
+					title : 'Data Validate',
+					frame	: true,
+					region : 'center',
+					layout: 'fit',
+					collapsible: false,
+					flex: 3,					
+					// autoScroll : true,
+					border: false,
+					items: gridDataValidate
+					
+				},				
+				{
+					xtype : 'panel',
+					autoScroll : true,
+					region : 'south',
+					frame	: true,
+					border	: false,
+					title : 'Detail Data Hourly',
+					layout: 'fit',					
+					flex: 1,
+					items : gridDetailHourlyValidate
+					// ,
+					// tools: [
+					// {
+						// type:'gear',
+						// tooltip: shide+' Detail',
+						// callback: function() {
+							// if (showDetailOK === 1 ){
+								// showDetailOK = 0;
+								// shide = 'Show';
+								// console.log(showDetailOK + shide);
+							// } else { 
+								// showDetailOK = 1; 
+								// shide = 'Hide';
+								// console.log(showDetailOK + shide);
+							// } 							
+						// }
+					
+					// }]
+				}
+			]
+		});
+		this.callParent(arguments);
+	}
+});

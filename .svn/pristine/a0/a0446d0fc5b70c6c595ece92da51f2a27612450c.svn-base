@@ -1,0 +1,117 @@
+function apps(name, iconCls) {
+    
+    var formanomaliamr = Ext.create('analisa.view.formanomaliamr');
+	var gridanomaliamr = Ext.create('analisa.view.gridanomaliamr');
+	var gridanomalistatus = Ext.create('analisa.view.gridanomalistatus');
+	var gridvolumehourly = Ext.create('analisa.view.gridvolumehourly');
+	
+	// var griddetaildata = Ext.create('analisa.view.griddatadetail');
+	// var griddetaildata;
+    //var gridkelamr = Ext.create('analisa.view.gridkelamr');	
+	
+    var tabPanel = Ext.getCmp('contentcenter');
+	tabPanel.items.each(function(c){
+		if (c.title != 'Home') {
+			tabPanel.remove(c);
+		}
+	});
+	
+    var items = tabPanel.items.items;
+    var exist = false;
+    // for (var i = 0; i < items.length; i++) {
+        // if (items[i].id == '3') {
+            // tabPanel.setActiveTab('3');
+            // exist = true;
+        // }
+    // }
+    if (!exist) {
+        // Ext.getCmp('contentcenter')
+		tabPanel.add({
+            title: 'AMR Data Anomali',
+            id: '3',
+            xtype: 'panel',
+            iconCls: iconCls,
+            closable: true,
+            layout: 'border',
+            // overflowY	: 'scroll',
+            defaults: {
+                collapsible: true,
+                split: true,
+                //bodyStyle: 'padding:5px'
+            },
+            // bodyPadding: '5 5 0',
+            items: [{
+                xtype: 'panel',
+                title: 'Form Search',
+                flex: 1,
+				id : 'searchanomaliform',
+                region: 'west',
+                // layout 		: 'fit',
+                bodyStyle: 'padding:5px',
+                //width			: 600,
+                // margins		: '10',
+                items: formanomaliamr
+                //items			: []
+            }, {
+                xtype: 'tabpanel',
+                flex: 3,
+				id : 'TabAsikAja',
+                collapsible: false,				
+                region: 'center',
+				activeTab	: 0,				
+				fit		: true,							
+				items	: [{
+					xtype	: 'panel',
+					title  : 'AMR Data Anomali',
+					frame: true,	
+					iconCls 	: 'application_view_gallery',
+					layout: 'border',
+					defaults: {
+						collapsible: true,
+						split: true,
+						//bodyStyle: 'padding:5px'
+					},
+					items	: [
+					{
+						xtype : 'panel',						
+						region : 'east',
+						frame	: true,
+						border	: false,					
+						title : 'Status Anomali',					
+						layout: 'fit',					
+						flex: 1,
+						border: false,
+						items : gridanomalistatus
+					},					
+					{
+						xtype : 'panel',
+						title : 'Data Anomali',
+						frame	: true,
+						region : 'center',
+						layout: 'fit',
+						collapsible: false,
+						flex: 3,		
+						items	: gridanomaliamr,
+						// autoScroll : true,
+						border: false
+						//items: gridkelData						
+					},					
+					{
+						xtype : 'panel',					
+						autoScroll : true,
+						region : 'south',
+						frame	: true,
+						border	: false,					
+						title : 'Detail Data Hourly',					
+						layout: 'fit',					
+						flex: 1,
+						items : gridvolumehourly
+					
+					}]
+				}]
+                //items: [ gridkelamr ]
+            }]
+        });
+        tabPanel.setActiveTab('3');
+    }
+}

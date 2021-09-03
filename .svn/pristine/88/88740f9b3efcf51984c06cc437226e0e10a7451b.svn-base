@@ -1,0 +1,63 @@
+Ext.define('analisa.view.charthourly', {
+ extend: 'Ext.panel.Panel',
+    // xtype: 'basic-line',
+
+    initComponent: function() {
+		
+		Ext.define('modelcharthourly',{
+			extend	: 'Ext.data.Model',
+			fields	: ['fhour','h1','h2','h3','h4','h5','h6','h7']
+		});
+		
+		
+	
+
+		Ext.apply(this,{	
+			layout: 'border',
+			defaults: {
+                collapsible: true,
+                split: true,
+            },
+			id: 'titleprofilinghourly',
+			frame: true,	
+			items: [ 
+				{	
+					xtype 			: 'panel',
+					title 			: 'Volume',
+					//autoScroll : true,
+					frame			: true,
+					region 			: 'north',
+					layout			: 'fit',
+					//collapsible: false,
+					flex			: 2,					
+					//autoScroll : true,
+					border			: true,
+					id				: 'amrcharthourly'
+					//items			: amrcharthourly 
+				},
+				{
+					xtype	: 'panel',
+					region	: 'center',
+					layout: 'fit',					
+					flex: 1,
+					title	: 'Pressure',
+					id		: 'amrcharthourlyfp',
+					//items : amrcharthourlyfp
+					
+				},
+				{
+					xtype	: 'panel',
+					region	: 'west',
+					layout: 'fit',					
+					flex: 1,
+					title	: 'Temperature',
+					id		: 'amrcharthourlyft',
+					//items : amrcharthourlyft
+				}
+			]
+		});
+		
+        this.callParent();
+    }
+	
+});

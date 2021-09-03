@@ -1,0 +1,150 @@
+Ext.define('analisa.view.gridpenyaluranstation' ,{
+	extend: 'Ext.grid.Panel',
+    
+	initComponent	: function()
+	{
+		Ext.define('mgridpenyaluranstation',{
+		extend	: 'Ext.data.Model',
+		fields	: ['stationname','confname','description','tanggal','tbl_station_id','volume','energy','ghv','pin','pout','temp','counter_volume','counter_energy']
+	});
+	
+	var storesbu	= Ext.create('mapping.store.sbu');
+	var storearea 	= Ext.create('mapping.store.area');
+	
+	var itemsarea = new Array();
+	var itemssbu = new Array();
+	
+	storearea.load(function(records){
+		Ext.each(records, function(record){
+			itemsarea.push(record.get('area'));
+					//n++;
+		});
+	});
+	storesbu.load(function(records){
+		Ext.each(records, function(record){
+			itemssbu.push(record.get('description'));
+		});
+	});
+	
+	var storegridpelindustri = Ext.create('Ext.data.JsonStore',{
+		model	: 'mgridpenyaluranstation',
+		proxy	: {
+		type			: 'pgascomProxy',
+		url				: base_url+'admin/mapping/getpenyaluranstation',
+		//extraParams 	: {id : '24'},
+		reader: {
+			type: 'json',
+			root: 'data'
+		}
+		}
+	});
+	storegridpelindustri.load();
+	
+		var filterconfig = {ftype	: 'filters',
+			filters	: [
+				{
+					type	: 'date',
+					dateFormat	: 'Y-m-d',
+					dataIndex	: 'tanggal'
+				},
+				{
+					type		: 'list',
+					dataIndex	: 'name_area',
+					options		: itemsarea,
+					phpMode		: true
+				},
+				{
+					type		: 'list',
+					dataIndex	: 'name_sbu',
+					options		: itemssbu,
+					phpMode		: true
+				}
+			]
+		};
+		var role = {"p_export"	: true};
+		//console.log(role.p_export);
+		
+		Ext.apply(this, {
+			store		: storegridpelindustri,
+			title		: 'Realisasi Penyaluran Station',
+			//height		: 200,
+			multiSelect	: true,
+			//selType		: 'checkboxmodel',
+			autoScroll	: true,
+			id			: 'gridpenyaluranstation',
+			dockedItems	: [
+				{
+					xtype: 'toolbar',
+					items	: [{
+						iconCls	: 'page_white_excel',
+						xtype	: 'exporterbutton',
+						text	: 'Export',
+						//hidden	: role.p_export,
+						format	: 'excel'
+					}]
+				}
+			],
+			columns		: [
+			Ext.create('Ext.grid.RowNumberer',{header:'No'}),
+			{
+				"text"	: "Station Name",
+				"locked"	: true,
+				"flex"		: 1,
+				"dataIndex" : "stationname"
+			},{
+				"text"	: "Jenis Station",
+				"dataIndex"	 : "confname",
+				"locked"	: true,
+			},
+			{
+				"text"		: "RD",
+				"locked"	: true,
+				"dataIndex"	: "description"
+			},{
+				"text"	: "Tanggal",
+				"dataIndex"	: "tanggal",
+				xtype		: 'datecolumn',
+				//"dataIndex"	: "tanggal",
+				format		: 'Y-m-d'
+			},{
+				"text"	: "Volume",
+				"dataIndex"	: "volume"
+			},
+			{
+				"text"	: "Energy",
+				"dataIndex"	: "energi"
+			},
+			{
+				"text"	: "ghv",
+				"dataIndex"	: "ghv"
+			},{
+				"text"	: "pin",
+				"dataIndex"	: "pin"
+			},
+			{
+				"text"		: "P Out",
+				"dataIndex"	: "tanggal_mapping"
+			},
+			{
+				"text"		: "temp",
+				"dataIndex"	: "temp"
+			},
+			{
+				"text"		: "Counter Volume",
+				"dataIndex"	: "counter_volume"
+			},
+			{
+				"text"		: "Counter Energy",
+				"dataIndex"	: "counter_energy"
+			}],
+			features	: [filterconfig],
+			//plugins	: editing,
+			bbar: Ext.create('Ext.PagingToolbar', {
+				pageSize: 10,
+				store: storegridpelindustri,
+				displayInfo: true
+			})
+		});
+		this.callParent(arguments);
+	}
+})

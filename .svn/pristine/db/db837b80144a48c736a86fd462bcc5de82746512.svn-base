@@ -1,0 +1,55 @@
+function apps(name, iconCls) {
+    
+    var formanomalinonamr = Ext.create('analisa.nonamr.view.formanomalinonamr');
+	var gridanomalinonamr = Ext.create('analisa.nonamr.view.gridanomalinonamr');
+	
+    var tabPanel = Ext.getCmp('contentcenter');
+	tabPanel.items.each(function(c){
+		if (c.title != 'Home') {
+			tabPanel.remove(c);
+		}
+	});
+	
+    var items = tabPanel.items.items;
+    var exist = false;
+    if (!exist) {
+		tabPanel.add({
+            title: 'Non AMR Data Anomali',
+            id: '444',
+            xtype: 'panel',
+            iconCls: iconCls,
+            closable: true,
+            layout: 'border',
+            // overflowY	: 'scroll',
+            defaults: {
+                collapsible: true,
+                split: true,
+                //bodyStyle: 'padding:5px'
+            },
+            // bodyPadding: '5 5 0',
+            items: [{
+                xtype: 'panel',
+                title: 'Form Search',
+                flex: 1,
+				id : 'searchanomaliform',
+                region: 'west',
+                // layout 		: 'fit',
+                bodyStyle: 'padding:5px',
+                //width			: 600,
+                // margins		: '10',
+                items: formanomalinonamr
+                //items			: []
+            }, {
+                xtype: 'tabpanel',
+                flex: 3,
+				id : 'TabAsikAja',
+                collapsible: false,				
+                region: 'center',
+				activeTab	: 0,				
+				fit		: true,				
+                items: [ gridanomalinonamr ]
+            }]
+        });
+        tabPanel.setActiveTab('444');
+    }
+}

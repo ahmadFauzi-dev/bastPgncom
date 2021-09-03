@@ -1,0 +1,74 @@
+Ext.define('analisa.view.formvalidamr' ,{
+		extend: 'Ext.form.Panel',
+		// alias : 'widget.formvalidamr',
+		initComponent: function() {		
+			
+			
+			Ext.apply(this, {
+				frame		: false,
+				border		: false,
+				layout		: 'form',
+				frame  		: false,
+				method		: 'POST',
+				// url			: base_url+'admin/findamr',
+				bodyPadding: '5 5 0',
+				fieldDefaults: {
+					labelAlign: 'left',
+					anchor: '60%'
+				},
+				id			: 'formvalid',
+				items		: 
+				[			
+						
+					{
+						xtype		: 'datefield',
+						fieldLabel	: 'Start Date',
+						name		: 'startt',
+						// margins		: '0 0 0 5',
+						// labelWidth	: 150,
+						format		: 'Y-m-d',
+						//flex	: 1
+					},
+					{
+						xtype			: 'datefield',
+						// margins			: '0 0 0 5',
+						name			: 'endd',
+						//flex			: 2,
+						// labelWidth		: 150,
+						fieldLabel		: 'End Date',
+						format			: 'Y-m-d',
+		
+					},					
+					{
+						xtype		: 'textfield',
+						fieldLabel	: 'ID Pelanggan',
+						name		: 'id_pel'
+					},
+					{
+						xtype		: 'textfield',
+						fieldLabel	: 'Nama Pelanggan',
+						name		: 'namapel'
+					}					
+				],
+				buttons		: [{
+							text	: 'Search',
+							iconCls : 'magnifier',
+							handler	: function()
+							{
+								
+							}
+						},
+						{
+							text	: 'Reset',
+							iconCls : 'arrow_refresh',
+							handler	: function()
+							{
+								this.up('form').getForm().reset();
+							}
+						}
+				]
+		});
+
+		this.callParent(arguments);
+	}
+	});

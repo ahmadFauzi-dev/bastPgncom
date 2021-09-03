@@ -1,0 +1,15 @@
+<!--#include virtual="header.html" --> || Test page
+<!--#include virtual="top.html" -->
+<b><a href="documentation/index.html" target="_blank">Documentation</a>&nbsp;|&nbsp;
+<a href="statistic.html">On-line statistic</a>&nbsp;|&nbsp;
+<a href="mailto:support@fast-report.com">Contact e-mail</a>&nbsp;|&nbsp;
+<a href="http://www.fast-report.com" target="_blank">FastReport home site</a></b>
+<hr>
+<p><font face="Tahoma" size="4">
+<b>List of available reports at the server</b><br></font></p>
+<font face="Tahoma" size="2">
+<!--#echo var="SERVER_REPORTS_HTML"-->
+</font>
+<!--#include virtual="bottom.html" -->
+</body>
+</html>

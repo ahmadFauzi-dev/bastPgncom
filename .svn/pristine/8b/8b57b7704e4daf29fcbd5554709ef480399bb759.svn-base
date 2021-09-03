@@ -1,0 +1,818 @@
+function apps(name, iconCls) {
+     
+    var formprofilingamr = Ext.create('analisa.view.formprofilingamr');    
+    var gridprofilingamr = Ext.create('analisa.view.chart'); 
+    var gridprofilinghourlyamr = Ext.create('analisa.view.charthourly'); 
+	
+	Ext.define('modelGridprofiling',{
+			extend	: 'Ext.data.Model',
+			fields	: ['id_pel','tanggal','stream','namapel']
+		});	
+
+		var storeGridprofiling = Ext.create('Ext.data.JsonStore',{
+			model	: 'modelGridprofiling',
+			storeId: 'GridprofilingStore',
+			proxy: {
+				type: 'pgascomProxy',
+				pageParam: false, 
+				startParam: false, 
+				limitParam: false,			
+				url: base_url+'analisa/cariprofiling',
+				reader: {
+					type: 'json',				
+					root: 'data'
+				}			
+			}
+		});
+	
+	var gridDetailprofiling = Ext.create('Ext.grid.Panel',{		
+		store	: storeGridprofiling,
+		id		: 'Gridprofiling',		
+		// frame	: true,
+		// border	: false,					
+		// layout: 'fit',					
+		dockedItems: [					
+				{
+					xtype: 'pagingtoolbar',
+					dock: 'bottom',
+					store: storeGridprofiling,
+					displayInfo: true,
+					plugins : [Ext.create('Ext.ux.PagingToolbarResizer')]
+				}
+				],	
+		columns		: [
+				{	
+					dataIndex : 'id_pel',
+					text : 'ID Pelanggan',
+					flex: 1,
+					renderer:function(value, metaData, record, row, col, store, gridView)
+					{
+						metaData.tdAttr= 'data-qtip="'+value+'"';
+						return value;
+					}
+				},
+				{	
+					dataIndex : 'namapel',
+					text : 'Nama Pelanggan',
+					flex: 2,
+					renderer:function(value, metaData, record, row, col, store, gridView)
+					{
+						metaData.tdAttr= 'data-qtip="'+value+'"';
+						return value;
+					}					
+				},	
+				{	
+					dataIndex : 'stream',
+					text : 'Stream',
+					flex: 1					
+				}
+		],
+
+		listeners	: 
+				{
+					itemclick : function(model, record, index, eOpts)
+					{
+						var oksparams = record.data;
+						var chartdaily = Ext.getCmp('chartdaily').getStore();
+						Ext.Ajax.request({ 
+							url			: base_url+'analisa/getmodelfindprofilinghourly/fdvc',
+							method		: 'POST',
+							async		: false,
+							params		: {
+								endd : oksparams.tanggal,
+								id_pel : oksparams.id_pel,
+								stream : oksparams.stream
+							},
+							success: function(response,requst){
+								
+								var model_amrcharthourly = Ext.decode(response.responseText);
+								// console.log(model_amrcharthourly);
+								
+									Ext.define('modelcharthourly',{
+											extend	: 'Ext.data.Model',
+											fields	: model_amrcharthourly
+									});
+
+									var storeprohourly = Ext.create('Ext.data.JsonStore',{			
+										remoteSort  : true,						
+										model	: 'modelcharthourly',
+										storeId: 'amrChartHourlyStore',
+
+										proxy: {
+											type: 'pgascomProxy',			
+											url: base_url+'analisa/findprofilinghourly/fdvc',
+											reader: {
+												type: 'json',				
+												root: 'data'
+											}			
+										}
+									});	
+									
+									
+									
+									var storeprohourlyft = Ext.create('Ext.data.JsonStore',{			
+										remoteSort  : true,						
+										model	: 'modelcharthourly',
+										storeId: 'amrChartHourlyStoreft',
+
+										proxy: {
+											type: 'pgascomProxy',			
+											url: base_url+'analisa/findprofilinghourly/ft',
+											reader: {
+												type: 'json',				
+												root: 'data'
+											}			
+										}
+									});
+										
+										var storeprohourlyfp = Ext.create('Ext.data.JsonStore',{			
+											remoteSort  : true,						
+											model	: 'modelcharthourly',
+											storeId: 'amrChartHourlyStoreft',
+
+											proxy: {
+												type: 'pgascomProxy',			
+												url: base_url+'analisa/findprofilinghourly/fp',
+												reader: {
+													type: 'json',				
+													root: 'data'
+												}			
+											}
+										});
+										
+									storeprohourly.getProxy().extraParams = {
+										endd : oksparams.tanggal,
+										id_pel : oksparams.id_pel,
+										stream : oksparams.stream									
+									};
+									storeprohourly.reload({method: 'POST'});
+									
+									storeprohourlyft.getProxy().extraParams = {
+										endd : oksparams.tanggal,
+										id_pel : oksparams.id_pel,
+										stream : oksparams.stream									
+									};
+									storeprohourlyft.reload({method: 'POST'});
+									
+									storeprohourlyfp.getProxy().extraParams = {
+										endd : oksparams.tanggal,
+										id_pel : oksparams.id_pel,
+										stream : oksparams.stream									
+									};
+									storeprohourlyfp.reload({method: 'POST'});
+									
+									
+									var amrcharthourly = Ext.create('Ext.chart.Chart', {
+										id: 'charthourly',
+										style: 'background:#fff',
+										animate: true,
+										height: 460,
+										insetPadding: 10,
+										store: storeprohourly,
+										// shadow: false,
+										// theme: 'Category1',
+										legend: {
+											position: 'right'
+										},
+										axes: [{
+											type: 'Numeric',
+											minimum: 0,
+											position: 'left',
+											title: 'Volume (m3)',
+											fields: [ model_amrcharthourly[4], model_amrcharthourly[5], model_amrcharthourly[6], model_amrcharthourly[7], model_amrcharthourly[8], model_amrcharthourly[9], model_amrcharthourly[10]],
+											grid: true,
+											label: {
+												renderer: Ext.util.Format.numberRenderer('0,000')
+											}
+											// minorTickSteps: 0.2,
+										}, {
+											type: 'Category',
+											position: 'bottom',
+											grid: true,
+											fields: ['fhour'],
+											title: 'Jam'
+										}],
+										series: [{
+											type: 'line',
+											highlight	: true,
+											axis: 'left',
+											xField: 'fhour',
+											yField: model_amrcharthourly[4],
+											showMarkers:true,
+											smooth	: false,
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[4]));
+													}
+												}											
+
+										}, {
+											 type: 'line',
+												axis: 'left',
+												smooth: false,
+												xField: 'fhour',
+												yField: model_amrcharthourly[5],
+												highlight	: true,
+												showMarkers:true,
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[5]));
+													}
+												}
+
+										}, {
+											type: 'line',
+											axis: 'left',
+											//smooth: true,
+											//fill: true,
+											xField: 'fhour',
+											showMarkers:true,
+											yField: model_amrcharthourly[6],
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[6]));
+													}
+												}
+											
+										},
+										{
+											type: 'line',
+											axis: 'left',
+											//smooth: true,
+											//fill: true,
+											xField: 'fhour',
+											showMarkers:true,
+											yField: model_amrcharthourly[7],
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[7]));
+													}
+												}
+											
+										},
+										{
+											type: 'line',
+											axis: 'left',
+											//smooth: true,
+											//fill: true,
+											xField: 'fhour',
+											showMarkers:true,
+											yField: model_amrcharthourly[8],
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[8]));
+													}
+												}
+											
+										},
+										{
+											type: 'line',
+											axis: 'left',
+											//smooth: true,
+											//fill: true,
+											xField: 'fhour',
+											showMarkers:true,
+											yField: model_amrcharthourly[9],
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[9]));
+													}
+												}
+
+											},
+										{
+											type: 'line',
+											axis: 'left',
+											//smooth: true,
+											//fill: true,
+											xField: 'fhour',
+											showMarkers:true,
+											yField: model_amrcharthourly[10],
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[10]));
+													}
+												}
+											
+										}]
+									});	
+										
+									var amrcharthourlyft = Ext.create('Ext.chart.Chart', {
+											id: 'charthourlyft',
+											style: 'background:#fff',
+											animate: true,
+											height: 460,
+											store: storeprohourlyft,
+											// shadow: false,
+											// theme: 'Category1',
+											legend: {
+												position: 'right'
+											},
+											axes: [{
+											type: 'Numeric',
+											minimum: 0,
+											position: 'left',
+											title: 'Celcius',
+											fields: [ model_amrcharthourly[4], model_amrcharthourly[5], model_amrcharthourly[6], model_amrcharthourly[7], model_amrcharthourly[8], model_amrcharthourly[9], model_amrcharthourly[10]],
+											grid: true,											
+											// minorTickSteps: 0.2,
+											}, {
+												type: 'Category',
+												position: 'bottom',
+												grid: true,
+												fields: ['fhour'],
+												title: 'Jam'
+											}],
+											series: [{
+												type: 'line',
+												highlight	: true,
+												axis: 'left',
+												xField: 'fhour',
+												yField: model_amrcharthourly[4],
+												showMarkers:true,
+												smooth	: false,
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[4]));
+													}
+												}
+											}, {
+												 type: 'line',
+													axis: 'left',
+													smooth: false,
+													xField: 'fhour',
+													yField: model_amrcharthourly[5],
+													highlight	: true,
+													showMarkers:true,
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[5]));
+													}
+												}
+													
+											}, {
+												type: 'line',
+												axis: 'left',
+												//smooth: true,
+												//fill: true,
+												xField: 'fhour',
+												showMarkers:true,
+												yField: model_amrcharthourly[6],
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[6]));
+													}
+												}
+												
+											},
+											{
+												type: 'line',
+												axis: 'left',
+												//smooth: true,
+												//fill: true,
+												xField: 'fhour',
+												showMarkers:true,
+												yField: model_amrcharthourly[7],
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[7]));
+													}
+												}
+												
+											},
+											{
+												type: 'line',
+												axis: 'left',
+												//smooth: true,
+												//fill: true,
+												xField: 'fhour',
+												showMarkers:true,
+												yField: model_amrcharthourly[8],
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[8]));
+													}
+												}
+												
+											},
+											{
+												type: 'line',
+												axis: 'left',
+												//smooth: true,
+												//fill: true,
+												xField: 'fhour',
+												showMarkers:true,
+												yField: model_amrcharthourly[9],
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[9]));
+													}
+												}
+												
+											},
+											{
+												type: 'line',
+												axis: 'left',
+												//smooth: true,
+												//fill: true,
+												xField: 'fhour',
+												showMarkers:true,
+												yField: model_amrcharthourly[10],
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[10]));
+													}
+												}
+
+											}]
+									});	
+									
+									var amrcharthourlyfp = Ext.create('Ext.chart.Chart', {
+											id: 'charthourlyfp',
+											style: 'background:#fff',
+											animate: true,
+											height: 460,
+											store: storeprohourlyfp,
+											// shadow: false,
+											// theme: 'Category1',
+											legend: {
+												position: 'right'
+											},
+											axes: [{
+											type: 'Numeric',
+											minimum: 0,
+											title: 'Bar',
+											position: 'left',
+											fields: [ model_amrcharthourly[4], model_amrcharthourly[5], model_amrcharthourly[6], model_amrcharthourly[7], model_amrcharthourly[8], model_amrcharthourly[9], model_amrcharthourly[10]],
+											grid: true,											
+											// minorTickSteps: 0.2,
+											}, {
+												type: 'Category',
+												position: 'bottom',
+												grid: true,
+												fields: ['fhour'],
+												title: 'Jam'
+											}],
+											series: [{
+												type: 'line',
+												highlight	: true,												
+												axis: 'left',
+												xField: 'fhour',
+												yField: model_amrcharthourly[4],
+												showMarkers:true,
+												smooth	: false	,
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[4]));
+													}
+												}
+												
+											}, {
+												 type: 'line',
+													axis: 'left',
+													smooth: false,
+													xField: 'fhour',
+													yField: model_amrcharthourly[5],
+													highlight	: true,
+													showMarkers:true,
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[5]));
+													}
+												}
+													
+											}, {
+												type: 'line',
+												axis: 'left',
+												//smooth: true,
+												//fill: true,
+												xField: 'fhour',
+												showMarkers:true,
+												yField: model_amrcharthourly[6],
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[6]));
+													}
+												}
+												
+											},
+											{
+												type: 'line',
+												axis: 'left',
+												//smooth: true,
+												//fill: true,
+												xField: 'fhour',
+												showMarkers:true,
+												yField: model_amrcharthourly[7],
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[7]));
+													}
+												}
+												
+											},
+											{
+												type: 'line',
+												axis: 'left',
+												//smooth: true,
+												//fill: true,
+												xField: 'fhour',
+												showMarkers:true,
+												yField: model_amrcharthourly[8],
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[8]));
+													}
+												}
+												
+											},
+											{
+												type: 'line',
+												axis: 'left',
+												//smooth: true,
+												//fill: true,
+												xField: 'fhour',
+												showMarkers:true,
+												yField: model_amrcharthourly[9],
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[9]));
+													}
+												}
+												
+											},
+											{
+												type: 'line',
+												axis: 'left',
+												//smooth: true,
+												//fill: true,
+												xField: 'fhour',
+												showMarkers:true,
+												yField: model_amrcharthourly[10],
+												tips: {
+													trackMouse: true,
+													style: 'background: #FFF',
+													height: 20,
+													showDelay: 0,
+													dismissDelay: 0,
+													hideDelay: 0,
+													renderer: function(storeItem, item) {
+														this.setTitle(storeItem.get(model_amrcharthourly[10]));
+													}
+												}
+												
+											}]
+									});	
+								
+								
+									Ext.getCmp("amrcharthourly").add(amrcharthourly);
+									Ext.getCmp("amrcharthourly").doLayout();
+									
+									Ext.getCmp("amrcharthourlyfp").add(amrcharthourlyfp);
+									Ext.getCmp("amrcharthourlyfp").doLayout();
+									
+									Ext.getCmp("amrcharthourlyft").add(amrcharthourlyft);
+									Ext.getCmp("amrcharthourlyft").doLayout();
+								//role_event = response.responseText;
+								//myValue	   = Ext.decode(response.responseText);
+								//myValue = response.responseText;
+							},
+							failure:function(response,requst)
+							{
+								Init.model = response.responseText;
+								//Ext.Msg.alert('Fail !','Input Data Entry Gagal');
+								//Ext.Msg.alert('Warning!', 'Authentication server is unreachable : ' + action.response.responseText + "");
+							}
+										
+						});
+								
+						
+						// var charthourly = Ext.getCmp('charthourly').getStore();
+						// var charthourlyfp = Ext.getCmp('charthourlyfp').getStore();
+						// var charthourlyft = Ext.getCmp('charthourlyft').getStore();
+						
+						chartdaily.getProxy().extraParams = {
+							endd : oksparams.tanggal,
+							id_pel : oksparams.id_pel,
+							stream : oksparams.stream									
+							};
+						chartdaily.reload({method: 'POST'});
+
+					
+					}
+				}
+		});
+	
+    var tabPanel = Ext.getCmp('contentcenter');
+	tabPanel.items.each(function(c){
+		if (c.title != 'Home') {
+			tabPanel.remove(c);
+		}
+	});
+    var items = tabPanel.items.items;
+    var exist = false;
+    if (!exist) {
+		tabPanel.add({
+            title: name,
+            id: '9',
+            xtype: 'panel',
+            iconCls: iconCls,
+            closable: true,
+            layout: 'border',
+            defaults: {
+                collapsible: true,
+                split: true,
+            },
+            items: [{
+                xtype: 'panel',
+                title: 'Form Search',
+				flex: 1,
+				id  : 'searchprofileamrform',
+                region: 'west',
+                bodyStyle: 'padding:5px',
+                // height		: 100,
+				layout: {
+					type: 'vbox',
+					align : 'stretch',
+					pack  : 'start',
+				},
+                items		: 
+				[
+				{
+					border	: false,
+					xtype: 'panel',
+					bodyStyle: 'padding:0 0 20px 0',
+					items: formprofilingamr
+				}, 
+				{	
+					xtype : 'panel',
+					// bodyStyle: 'padding:15px 0 0 0',
+					layout: 'fit',
+					border	: false,
+					flex : 2,
+					items: gridDetailprofiling
+				}
+				]
+            }, {
+                xtype: 'tabpanel',
+                flex: 3,
+				// layout:'fit',
+                collapsible: false,	
+                region: 'center',
+				// activeTab	: 0,				
+				fit		: true,							
+                items: [ {
+					xtype	: 'panel',
+					title  : 'Profiling Daily',
+					frame: true,	
+					iconCls 	: 'application_view_gallery',
+					layout: 'fit',
+					defaults: {
+						// collapsible: true,
+						split: true,
+						//bodyStyle: 'padding:5px'
+					},					
+					items: gridprofilingamr
+					
+					},
+					{
+					xtype	: 'panel',
+					title  : 'Profiling Hourly',
+					frame: true,	
+					iconCls 	: 'application_view_gallery',
+					layout: 'fit',
+					defaults: {
+						// collapsible: true,
+						split: true,
+						//bodyStyle: 'padding:5px'
+					},					
+					items: gridprofilinghourlyamr
+					
+					}
+
+					]
+            }]
+        });
+        tabPanel.setActiveTab('9');
+    }
+}

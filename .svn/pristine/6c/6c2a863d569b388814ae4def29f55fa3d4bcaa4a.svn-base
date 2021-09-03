@@ -1,0 +1,80 @@
+function apps(name, iconCls) {
+    
+	//var formsearch = Ext.create('master.view.searchpelanggan');
+	//var gridkontrak 	= Ext.create('master.view.gridkontrak');
+	//var gridlayanan		= Ext.create('master.view.gridlayananupdate');
+	//var formsearch 		= Ext.create('master.view.searchkontrak');
+	//var gridbill			= Ext.create('master.view.gridbill');
+	//var gridproduk			= Ext.create('master.view.gridlayananbill');
+	
+	//var gridmutasi			= Ext.create('master.view.mutasi.grid');
+	//var formsearch			= Ext.create('master.view.mutasi.search');
+	
+	var data_table				= Ext.create('monitoring.view.datatable');
+	var query 					= Ext.create('monitoring.view.queryform');
+    var tabPanel = Ext.getCmp('contentcenter');
+	tabPanel.items.each(function(c){
+		if (c.title != 'Home') {
+			tabPanel.remove(c);
+		}
+	});
+	
+    var items = tabPanel.items.items;
+    var exist = false;
+  
+    if (!exist) {
+        // Ext.getCmp('contentcenter')
+		tabPanel.add({
+            title: name,
+            id: 'kontrak',
+            xtype: 'panel',
+            iconCls: iconCls,
+            closable: true,
+            layout: 'border',
+            // overflowY	: 'scroll',
+            defaults: {
+                collapsible: true,
+                split: true,
+                //bodyStyle: 'padding:5px'
+            },
+            // bodyPadding: '5 5 0',
+            items: [
+			/*{
+                xtype		: 'panel',
+				 region		: 'west',
+				 layout		: 'fit',
+                title		: 'Form Search Table',
+                flex		: 1,
+				//id 			: 'searchpelanggan',
+                bodyStyle	: 'padding:5px',
+				items		: data_table
+            },
+			*/	
+			{
+				
+				xtype	: 'panel',
+				layout	: 'border',
+				region	: 'center',
+				collapsible: false,
+				flex	: 3,
+				//layout	: 'fit',
+				items	: [{
+					region	: 'north',
+					flex	: 1,
+					layout	: 'fit',
+					title	: 'Query',
+					items	: query
+				},
+				{
+					region	: 'center',
+					flex	: 3,
+					layout	: 'fit',
+					title	: 'Data',
+					id		: 'datatable'
+				}]
+					
+			}]
+        });
+        tabPanel.setActiveTab('kontrak');
+    }
+}

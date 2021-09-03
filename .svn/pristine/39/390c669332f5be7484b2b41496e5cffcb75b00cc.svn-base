@@ -1,0 +1,224 @@
+Ext.define('analisa.view.gridtaksasiamr' ,{
+	extend: 'Ext.grid.Panel',    
+	initComponent	: function()
+	{
+		Ext.define('modelGridTaksasiamr',{
+			extend	: 'Ext.data.Model',
+			fields	: ['customer_code','customer_name','sbuid','areaname','badnumber','calc_datetime_start','calc_datetime_end','q1_result','description','tanggal','stat','selectopts','approved','reffamralertid','reffidamrbridgedaily','baddate','fmonth','fyear','fdatetime','file_scan']
+		});		
+		
+		var darecord ;
+		
+		var storeGridTaksasiamr = Ext.create('Ext.data.JsonStore',{
+			model	: 'modelGridTaksasiamr',
+			storeId: 'amrTaksasiStore',
+			proxy: {
+				type: 'pgascomProxy',			
+				url: base_url+'analisa/findamrtaksasi',
+				reader: {
+					type: 'json',				
+					root: 'data'
+				}			
+			}
+		});	
+		
+		// storeGridDaily.load();
+		Ext.apply(this,{
+		title  		: 'AMR Taksasi',
+		iconCls 	: 'date',
+		multiSelect	: true,
+		selType		: 'checkboxmodel',
+		store		: storeGridTaksasiamr,
+		id			: 'gridTaksasiamr',		
+		dockedItems: [
+		{
+			xtype: 'toolbar',
+			items: [
+				{
+					iconCls: 'accept',					
+					text: 'Approved',
+					handler	: function()
+					{
+						var items = [];
+						storeGridTaksasiamr.each(function(record){
+							
+							if (record.data.selectopts == true)
+							{
+								items.push(record.data);
+								//console.log(record.data);
+							}
+						});
+						
+						//console.log(items);
+						
+						Ext.Ajax.request({ 
+							url			: base_url+'analisa/approvaltaksasi',
+							method: 'POST',
+							params:{
+								data : Ext.encode(items)
+							},
+							success: function(response,requst){
+								Ext.Msg.alert('Sukses','Data Telah di Approve');
+								//workflowGrid.load();
+								//console.log(response.text);
+								//alert('test');
+								storeGridTaksasiamr.reload();
+							},
+							failure:function(response,requst)
+							{
+								Ext.Msg.alert('Fail !','Input Data Gagal');
+								Ext.Msg.alert('Warning!', 'Authentication server is unreachable : ' + action.response.responseText + "");
+							}
+										
+						});
+					}
+	
+				},{
+					text: 'Reject',
+					iconCls : 'cancel'
+				},{
+					text: 'Export',
+					iconCls : 'page_white_excel',
+					xtype : 'exporterbutton',
+					format: 'excel',
+                    title: 'Data Taksasi'
+				}				
+				]
+		},
+		{
+			xtype: 'pagingtoolbar',
+			dock: 'bottom',
+			store: storeGridTaksasiamr,
+			displayInfo: true/* ,
+			items : [{
+				xtype: 'button',
+				text: 'Clear All',
+				tooltip  : 'Clear Filters',
+				iconCls  : 'page_white_magnify',
+				handler:function(){
+					cilukba.clearFilters();
+					// cilukba.filters.clearFilters();
+				}
+			}] */
+		}],	
+		
+		
+		
+		columns		: [
+			{
+				 text : 'BA',
+				 align	: 'center',
+				 xtype:'actioncolumn', 
+				 width		: 50,
+				 items : [{
+						icon: base_url+'asset/icons/page_attach.png',  // Use a URL in the icon config
+						tooltip: 'Download',
+						align	: 'center',
+						handler: function(grid, rowIndex, colIndex) {
+						var rec = grid.getStore().getAt(rowIndex);
+							//alert("Edit " + rec.get('firstname'));
+							window.location.href= rec.get('file_scan');
+					}
+
+				 }]
+				
+			},
+			{
+				text	: 'RD',
+				width	: 100,
+				align	: 'center',
+				dataIndex	: 'sbuid'
+			},
+			{
+				text	: 'Area',
+				width	: 100,
+				align	: 'center',
+				dataIndex	: 'areaname'
+			},		
+			
+			{
+				text	: 'No Reff',
+				width	: 100,
+				align	: 'center',
+				dataIndex	: 'customer_code'
+			},
+			{
+				text	: 'Nama Pelanggan',
+				width	: 100,
+				align	: 'center',
+				dataIndex	: 'customer_name'
+			},			
+			{
+				text	: 'Tanggal',
+				width		: 150,
+				align	: 'center',
+				dataIndex	: 'baddate'
+			},
+			{
+				text	: 'Bad Number',
+				width		: 150,
+				align	: 'center',
+				dataIndex	: 'badnumber'
+			},
+			{
+				text	: 'Kalkulasi',
+				align	: 'center',
+				columns  : [{
+					text : 'Awal',
+					align	: 'center',
+					dataIndex	: 'calc_datetime_start'
+				},
+				{
+					text : 'Akhir',
+					align	: 'center',
+					dataIndex	: 'calc_datetime_end'
+				}
+				]				
+			},
+			{
+				text	: 'Volume m3',
+				align	: 'center',
+				dataIndex	: 'q1_result'
+			},
+
+			
+			{
+				text	: 'Keterangan',
+				align	: 'center',
+				dataIndex	: 'description'				
+			}
+			
+		],
+		listeners	: 
+		{
+			/* beforeitemcontextmenu: function(view, record, item, index, e)
+			{
+				e.stopEvent();
+				k_menu.showAt(e.getXY());
+			},
+			itemclick	: function(view, record, item, index, e, eOpts)
+			{
+				darecord = record.data ;
+				//console.log(darecord);
+			},
+			selectionchange: function (view, record, item, index, e, eOpts) {
+					//console.log('selectionchange fired'+index);
+			}, */
+			select: function (model, record, index, eOpts) {
+				//console.log(record.data);
+				//record.data.selectopts = true;
+				record.set('selectopts',true);
+				record.set('approved', '1');
+			},
+			deselect: function (view, record, item, index, e, eOpts) {
+				//console.log('deselect fired'+index);
+				//record.data.selectopts = false;
+				record.set('approved','0');
+				record.set('selectopts',false);
+			}
+			
+		}
+		});
+		this.callParent(arguments);
+	}
+})

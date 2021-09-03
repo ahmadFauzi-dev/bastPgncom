@@ -1,0 +1,249 @@
+Ext.define('simpel.surat_masuk.formtasksuratmasukdetail' ,{	
+	extend: 'Ext.form.Panel',
+	initComponent: function() {	
+
+			var pageId = '3317';
+			//console.log(pageId);
+			//store_rekanan_m
+			var msclass = Ext.create('master.global.geteventmenu'); 
+			var filter = [];
+			var gridattdokumensm = Ext.create('simpel.surat_masuk.gridtaskattdokumensm');
+			var griddisposisi = Ext.create('simpel.surat_masuk.griddisposisi');
+			var gridperintahdisposisi = Ext.create('simpel.surat_masuk.gridperintahdisposisi');
+			
+		Ext.apply(this, {
+				xtype		: 'form',
+				frame		: false,
+				url			: base_url+'simpel/add_disposisi',
+				collapsed :false,
+				border		: false,
+				title		: "Disposisi",
+				autoScroll	:true,
+				fileUpload	: true,
+				frame  		: false,
+				method		: 'POST',
+				//bodyPadding: '5 5 0',
+				fieldDefaults: {
+					labelAlign: 'left',
+					anchor: '60%'
+				},
+				id			: 'formtasksuratmasukdetailsm'+pageId,
+				flex : 1,
+				defaultType	: 'textfield',
+				items		: [
+				{		
+						xtype		: 'fieldset',
+						defaultType	: 'textfield',
+						//id			: 'fieldsetformNewRelocation',
+						border		: false,
+						layout		: 'anchor',
+						defaults: {
+							anchor: '100%'
+						},
+						items		: [
+							{
+								xtype: 'textfield',
+								fieldLabel: "rowid",
+								name: "rowid",
+								hidden : true	
+							},
+							{
+								xtype: 'textfield',
+								fieldLabel: "reffsurat",
+								name: "reffsurat",
+								hidden : true	
+							},
+							{
+								xtype: 'textfield',
+								fieldLabel: "reffsuratkeluar",
+								name: "reffsuratkeluar",
+								hidden : true	
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "Jabatan",
+								name: "nama_jabatantujuan",
+								fieldStyle: 'background:none'								
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "Satuan Kerja",
+								name: "str_tujuansurat",
+								fieldStyle: 'background:none'								
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "No Surat",
+								name: "no_surat",
+								fieldStyle: 'background:none'								
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "No Agenda",
+								name: "no_disposisi",
+								fieldStyle: 'background:none'								
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "Perihal",
+								name: "perihal",
+								grow: true
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "Sifat",
+								name: "str_sifat",
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "Keamanan",
+								name: "nama_keamanan",
+							},
+							{
+								xtype: 'textfield',
+								fieldLabel: "keamanan",
+								id : "keamanansm"+pageId,
+								name: "keamanan",
+								hidden : true
+							},
+							{
+								xtype: 'textfield',
+								fieldLabel: "reffjenispenerima",
+								id : "reffjenispenerimasm"+pageId,
+								name: "reffjenispenerima",
+								hidden : true
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "Satuan Kerja",
+								name: "str_satuankerja"
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: 'Tanggal Surat',
+								name: 'tanggal_surat'
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: 'Tanggal Surat Masuk',
+								name: 'waktu_terima'
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "Jenis Surat",
+								name: "str_jenissurat"
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: 'Isi Surat Masuk',
+								//id: "isisuratmasukdetail",
+								name: "sk_file",
+								hidden : false,
+								grow: true,
+								//width: 700, 
+								height: 50,
+								renderer : function(value, metaData, record){
+									
+									var keamanan = Ext.getCmp("keamanansm"+pageId).getValue();
+									var reffjenispenerima = Ext.getCmp("reffjenispenerimasm"+pageId).getValue();									
+									
+									if(value){
+										//console.log(value);
+										var url = base_url+"asset/pdfs/"+value;
+										if(keamanan == 'MD334' || keamanan == 'MD335'){
+												if(reffjenispenerima == 'MD399'){
+													return '<a href="'+url+'" target="_blank">Tampilkan Isi Surat</a>';
+												}
+												else{
+													return '-';
+												}
+										}
+										else{
+											return '<a href="'+url+'" target="_blank">Tampilkan Isi Surat</a>';
+										}
+									}
+									else{
+										//Ext.getCmp('isisuratmasukdetail').hide();
+										return '-';
+									}
+								}
+								
+							},
+							{
+								xtype: 'fieldcontainer',
+								fieldLabel: 'Lampiran',
+								//layout: 'hbox',
+								items: gridattdokumensm
+							},
+							{
+								xtype: 'fieldcontainer',
+								fieldLabel: 'Disposisi',
+								//layout: 'hbox',
+								id: 'griddisposisism'+pageId,
+								items: griddisposisi
+							},
+							{
+								xtype: 'textareafield',
+								fieldLabel: 'Komentar',
+								name: 'komentar',								
+								id: 'komentarsm'+pageId,
+							},
+							{
+								xtype: 'fieldcontainer',
+								fieldLabel: ' ',
+								//layout: 'hbox',
+								id: 'gridperintahdisposisism'+pageId,
+								items: gridperintahdisposisi
+							}]
+				}],
+                buttons			: [
+							{
+								text: 'Disposisi',
+								id: 'btndispo'+pageId,
+								disabled:false,
+								border : true,
+								iconCls:'disk',
+								//hidden:!ROLE.DRAFT_DATA,
+								handler: function(){									
+									var griddispo = Ext.getCmp('griddisposisi'+pageId);
+									var disporec = griddispo.getView().getSelectionModel().getSelection();							
+									var disposisi = [];
+									Ext.Array.each(disporec, function(record){
+										//console.log(record.data);
+										disposisi.push(record.data);
+									});
+									
+									var gridper = Ext.getCmp('gridperintahdisposisi'+pageId);
+									var perrec = gridper.getView().getSelectionModel().getSelection();									
+									var perdisposisi = [];
+									Ext.Array.each(perrec, function(record){
+										perdisposisi.push(record.data);
+									});
+									
+									if(this.up('form').getForm().isValid()){
+										this.up('form').getForm().submit({
+											waitTitle	: 'Harap Tunggu',
+											params:{
+												datadisposisi : Ext.encode(disposisi), 
+												dataperdisposisi : Ext.encode(perdisposisi), 
+											},
+											waitMsg		: 'Insert data', 
+											success	:function(form, action)
+											{
+												Ext.Msg.alert('Sukses','Sudah Didisposisi');
+												Init.winss_formtasksuratmasukdetail.close();
+												Ext.getCmp('idgrid_tasksuratmasuk').getStore().reload();
+											},
+											failure:function(form, action)
+											{
+												Ext.Msg.alert('Warning!', 'Authentication server is unreachable : ' + action.response.responseText + "");
+											}
+										});
+									}
+								}
+							}]				
+		});
+												
+		this.callParent(arguments);
+	}
+});

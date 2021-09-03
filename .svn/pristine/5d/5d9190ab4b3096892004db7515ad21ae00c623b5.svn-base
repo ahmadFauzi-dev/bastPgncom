@@ -1,0 +1,167 @@
+Ext.define('analisa.view.formanomaliamr' ,{
+		extend: 'Ext.form.Panel',
+		// alias : 'widget.formvalidamr',
+		initComponent: function() {
+						
+			Init.storeSBU.load();
+			Init.storeArea.load();
+			
+			Ext.apply(this, {
+				frame		: false,
+				border		: false,
+				layout		: 'form',
+				frame  		: false,
+				method		: 'POST',
+				// url			: base_url+'admin/findamr',
+				bodyPadding: '5 5 0',
+				fieldDefaults: {
+					labelAlign: 'left',
+					anchor: '60%'
+				},
+				id			: 'formanomali',
+				items		: 
+				[			
+						
+					{
+						xtype		: 'datefield',
+						fieldLabel	: 'Start Date',
+						name		: 'startt',
+						format		: 'Y-m-d',
+					},
+					{
+						xtype			: 'datefield',
+						name			: 'endd',
+						fieldLabel		: 'End Date',
+						format			: 'Y-m-d',
+		
+					},					
+					{
+						xtype		: 'combobox',
+						fieldLabel	: 'RD',						
+						name		: 'sbu',
+						displayField: 'description',
+						valueField: 'description',
+						queryMode: 'local',									
+						store: Init.storeSBU,
+						listeners : {
+							 select: function(combo) 
+							{
+								 var values = combo.getValue(),
+								 record = combo.findRecordByValue(values);
+								// console.log(record.data.rowid);
+								 Init.storeArea.reload({ params : { sbu : record.data.rowid }});
+								
+							 }
+						}						
+					},
+					{
+						xtype		: 'combobox',
+						fieldLabel	: 'Area',						
+						name		: 'area',
+						displayField: 'namearea',
+						valueField: 'namearea',
+						queryMode: 'local',									
+						store: Init.storeArea						
+					},
+					{
+						xtype		: 'textfield',
+						fieldLabel	: 'ID Pelanggan',
+						name		: 'id_pel'
+					},
+					{
+						xtype		: 'textfield',
+						fieldLabel	: 'Nama Pelanggan',
+						name		: 'namapel'
+					}					
+				],
+				buttons		: [{
+							text	: 'Search',
+							iconCls : 'magnifier',
+							handler	: function()
+							{
+								// Ext.getCmp('searchanomaliform').collapse();
+								var findform = this.up('form').getForm();
+								var oksparams = findform.getValues();
+								
+								var storeanomali = Ext.getCmp('gridAnomaliamr').getStore();
+								delete Init.specialparams;
+								storeanomali.getProxy().extraParams = {
+									startt : oksparams.startt,
+									endd : oksparams.endd,
+									sbu : oksparams.sbu,
+									area : oksparams.area,
+									id_pel : oksparams.id_pel,
+									namapel : oksparams.namapel									
+									};
+								storeanomali.loadPage(1);
+								// storeanomali.reload({method: 'POST'});	
+								
+								var itemska = [];
+								itemska.push(
+								{
+									field :"tanggal",
+									data  : {
+										type : "date",
+										comparison : "gt",
+										value	   : oksparams.startt
+									} 
+								},
+								{
+									field :"tanggal",
+									data  : {
+										type : "date",
+										comparison : "lt",
+										value	   : oksparams.endd
+									} 
+								},								
+								{
+									field :"sbu",
+									data  : {
+										type : "string",
+										comparison : "eq",
+										value	   : oksparams.sbu
+									}						
+								},
+								{
+									field :"area",
+									data  : {
+										type : "string",
+										comparison : "eq",
+										value	   : oksparams.area
+									}						
+								},
+								{
+									field :"id_pel",
+									data  : {
+										type : "string",
+										comparison : "eq",
+										value	   : oksparams.id_pel
+									}						
+								},
+								{
+									field :"namapel",
+									data  : {
+										type : "string",
+										comparison : "",
+										value	   : oksparams.namapel
+									}						
+								}											
+								);
+								Init.specialparams = itemska;					
+								
+							}
+						},
+						{
+							text	: 'Reset',
+							iconCls : 'arrow_refresh',
+							handler	: function()
+							{
+								this.up('form').getForm().reset();
+							}
+						}
+				]
+		});
+
+		this.callParent(arguments);
+	}
+	});

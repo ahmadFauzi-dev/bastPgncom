@@ -1,0 +1,108 @@
+Ext.define('monitoring.view.queryform' ,{
+		extend: 'Ext.form.Panel',
+		// alias : 'widget.formvalidamr',
+		initComponent: function() {	
+			
+			Init.storeSBU.load();
+			Init.storeArea.load();
+			
+			Ext.apply(this, {
+				frame		: false,
+				border		: false,
+				layout		: 'form',
+				frame  		: false,
+				method		: 'POST',
+				// url			: base_url+'admin/findamr',
+				bodyPadding: '5 5 0',
+				fieldDefaults: {
+					labelAlign: 'top',
+					anchor: '60%'
+				},
+				id			: 'formkel',
+				items		: 
+				[			
+						
+					{
+						xtype     : 'textareafield',
+						grow      : true,
+						name      : 'message',
+						fieldLabel: 'Query',
+						anchor    : '100%'
+					}		
+				],
+				buttons		: [{
+							text	: 'Execute',
+							iconCls : 'control_play',
+							handler	: function()
+							{
+								var findform = this.up('form').getForm();
+								var oksparams = findform.getValues();
+								console.log(oksparams);
+								var msclass = Ext.create('master.global.geteventmenu'); 
+								var model = msclass.getmodelquery(oksparams.message);
+								console.log(model);
+								var columns = msclass.getcolumnquery(oksparams.message);
+								var filter = [];
+								
+								var store =  msclass.getstorequery(model,oksparams.message);
+								store.load();
+								console.log(columns);
+								var gridActivityLog = Ext.create('Ext.grid.Panel',{
+										title		: 'Log Activity',
+										multiSelect	: true,
+										store		: store,
+										height		: 288,
+										border:false,
+										autoScroll	: true,
+										id			: 'gridActivityLog',
+										columns		: columns,
+										bbar: Ext.create('Ext.PagingToolbar', {
+											pageSize: 10,
+											store: store,
+											displayInfo: true
+										})
+									});
+								/*
+								var gridpopo = Ext.create('Ext.grid.Panel',{
+										store		: store,
+										multiSelect	: true,
+										height		: 300,
+										autoScroll	: true,
+										id			: Init.idmenu+'grid',
+										dockedItems	: [
+											{
+												xtype: 'toolbar',
+												items	: [{
+													iconCls	: 'page_white_excel',
+													xtype	: 'exporterbutton',
+													text	: 'Export',
+													//hidden	: role.p_export,
+													format	: 'excel'
+												},
+												{
+													text	: "Shync"
+												}]
+											}
+										],
+										columns		: columns,
+										bbar: Ext.create('Ext.PagingToolbar', {
+											pageSize: 10,
+											store: store,
+											displayInfo: true
+										})
+									});
+									*/
+									Ext.getCmp("datatable").add(gridActivityLog);
+									Ext.getCmp("datatable").doLayout();
+									
+								//var storekelamr = Ext.getCmp('gridKelamr').getStore();
+								
+								
+							}
+						}
+				]
+		});
+
+		this.callParent(arguments);
+	}
+	});

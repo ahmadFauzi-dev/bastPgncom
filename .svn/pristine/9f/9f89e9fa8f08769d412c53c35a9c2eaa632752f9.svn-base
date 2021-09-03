@@ -1,0 +1,249 @@
+function apps(name, iconCls){
+	var valuesimpan;
+	Ext.define('Init', {
+			valuesimpan
+	});
+	 
+	//====================|FRAMEWOR|===============
+	
+		var msclass 						= Ext.create('master.global.geteventmenu');
+		var pageId = Init.idmenu;
+		var v_table 	= "v_griddisposisi";
+		//var winimp;
+		//model_data.push('selectopts');
+		var model_data = msclass.getmodel(v_table);
+		var pstore = msclass.getstore(model_data,v_table,[]);
+		pstore.getProxy().extraParams = {
+						view :'v_griddisposisi',
+						limit : 'all',
+						"filter[0][field]" : "reffjabatan",
+						"filter[0][data][type]" : "string",
+						"filter[0][data][comparison]" : "eq",
+						"filter[0][data][value]" : sess_reffjabatan		
+		};
+		
+		pstore.load();
+		
+		var comboDispostatus = Ext.create('Ext.data.Store', {
+			fields: ['rowid', 'name'],
+			data : [
+						{"id":"Close", "name":"Close"},
+						{"id":"Open", "name":"Open"}
+					]
+			});
+			
+		comboDispostatus.load();
+		
+		var cgrid = msclass.getcolumngrid('idgrid_addpesertadisposisi',v_table);	
+		
+		cgrid[1].renderer =  function(val, meta, record, rowIndex){
+				var status = record.get('status_disp') ;
+				//console.log(status);
+				if(status == 'Close'){
+					return '<img src="'+base_url+'asset/ico/38.ico" /> '+status;
+				}
+				else{
+					return '<img src="'+base_url+'asset/ico/51.ico" /> '+status;
+				}
+			}; 
+		
+		
+		
+		var itemdocktop = [{
+			text	: 'Buka',
+			iconCls	: 'application_form_magnify',
+			handler	: function()
+			{
+				 var grid = Ext.getCmp('idgrid_addpesertadisposisi');				
+				var storegrid = grid.getStore();
+				storegrid.each(function(record){ 
+				  //console.log(record.data);
+				});
+				
+				var record 	= grid.getView().getSelectionModel().getSelection()[0];
+				var sm_id = record.get('rowid');
+				var sk_id = record.get('reffsuratkeluar');
+				var refftujuansurat = record.get('refftujuansurat');
+				var reffjenis = record.get('reffjenis');
+				Init.dispoid = record.get('reffdisposisi');
+				
+				console.log(Init.dispoid);
+				if (sm_id){									
+								if(!Init.winss_formaddpesertadisposisi){	
+									 var formaddpesertadisposisi = Ext.create('simpel.surat_masuk.formaddpesertadisposisi');
+									 Init.winss_formaddpesertadisposisi = Ext.widget('window', {
+										closeAction	: 'hide',
+										width: 700,
+										height	: 600,
+										autoScroll	:true,
+										//id			: ''+Init.idmenu+'winmapppelsource',
+										resizable	: true,
+										modal		: true,
+										bodyPadding	: 5,
+										layout		: 'fit',
+										items		: formaddpesertadisposisi
+									});
+									Ext.getCmp('formaddpesertadisposisi').getForm().reset();
+								}
+								
+								Init.winss_formaddpesertadisposisi.show();
+								
+								
+								var storead = Ext.getCmp('gridattdokumenadddisposisi').getStore();
+								storead.getProxy().extraParams = {
+									view :'tbl_attdokumen',
+									limit : 'All',
+									"filter[0][field]" : "reffsurat",
+									"filter[0][data][type]" : "string",
+									"filter[0][data][comparison]" : "eq",
+									"filter[0][data][value]" : sk_id,
+									"filter[1][field]" : "active",
+									"filter[1][data][type]" : "string",
+									"filter[1][data][comparison]" : "eq",
+									"filter[1][data][value]" : 'Y'
+								};
+								storead.reload();
+								
+						
+					
+					var myField 	= Ext.getCmp('formaddpesertadisposisi');
+					var form_data 	= myField.getForm();
+					form_data.loadRecord(record);
+				}
+			}
+		},
+		{
+			text	: 'Lihat Progres',
+			iconCls	: 'application_form_magnify',
+			handler	: function()
+			{
+				 var grid = Ext.getCmp('idgrid_addpesertadisposisi');				
+								
+				var record 	= grid.getView().getSelectionModel().getSelection()[0];
+				var reffdisposisi = record.get('reffdisposisi');
+
+				if (reffdisposisi){									
+								if(!Init.winss_gridviewprogresdispo){	
+									 var gridviewprogresdispo = Ext.create('simpel.surat_masuk.gridviewprogresdispo');
+									 Init.winss_gridviewprogresdispo = Ext.widget('window', {
+										closeAction	: 'hide',
+										width: 900,
+										height	: 400,
+										autoScroll	:true,
+										resizable	: true,
+										modal		: true,
+										bodyPadding	: 5,
+										layout		: 'fit',
+										items		: gridviewprogresdispo
+									});
+								}
+								
+								Init.winss_gridviewprogresdispo.show();
+								
+								
+								var storevdp = Ext.getCmp('gridviewprogresdispo'+pageId).getStore();
+								storevdp.getProxy().extraParams = {
+									view :"fn_getprogressdispo('"+reffdisposisi+"')",
+									limit : 'All'
+								};
+								storevdp.reload();
+				
+				}
+			}
+		}]
+		var pgrid  = msclass.getgridpeng(cgrid,'idgrid_addpesertadisposisi',itemdocktop,pstore);
+		var f_items    = msclass.getitemsform(v_table,'idform_srcaddpesertadisposisi');
+		var pformsearch = msclass.getformsearchpeng1(f_items);
+		
+		f_items[2].id = 'reffstatussrcdisp';
+        var pformsearch = msclass.getformsearchpeng1(f_items);
+		var get_toolbar =  [];
+	   var stores = Ext.getCmp('reffstatussrcdisp').getStore().load();
+	   
+		
+	//==================| SEARCH |======================================================
+	var parms_pgrid = Ext.getCmp('idgrid_addpesertadisposisi').getStore();
+	var fsearch =  Ext.create('Ext.form.Panel',{ 
+				xtype: 'form',
+				title: 'Form Search', 
+				flex: 1,
+				width	: 250,
+				id : 'searchgridaddpesertasuratmasuk',
+				region: 'west',
+				bodyStyle: 'padding:5px',
+				layout: {
+					type: 'vbox',
+					align : 'stretch',
+					pack  : 'start',
+				},
+				//tbar	:ptoolbar_search,
+				items	: [{
+					border	: false,
+					xtype: 'panel',
+					bodyStyle: 'padding:0 0 20px 0',
+					items : pformsearch,
+					buttons		: [{
+								text	: 'Search',
+								iconCls : 'magnifier',
+								handler	: function()
+									{
+										var findform = this.up('form').getForm();
+										var oksparams = findform.getValues();
+										//console.log(oksparams);
+									   
+										parms_pgrid.getProxy().extraParams = {
+												view :'public.v_griddisposisi',
+												limit : "All",
+												
+												"filter[0][field]" : "satuan_kerja",
+												"filter[0][data][type]" : 'string',
+												"filter[0][data][comparison]" : "",
+												"filter[0][data][value]" : oksparams.satuan_kerja,
+												
+												"filter[1][field]" : "no_surat",
+												"filter[1][data][type]" : 'string',
+												"filter[1][data][comparison]" : "",
+												"filter[1][data][value]" : oksparams.no_surat,
+												
+												"filter[2][field]" : "waktu_terima",
+												"filter[2][data][type]" : "date",
+												"filter[2][data][comparison]" : "gt",
+												"filter[2][data][value]" : oksparams.startt,
+												
+												"filter[3][field]" : "waktu_terima",
+												"filter[3][data][type]" : "date",
+												"filter[3][data][comparison]" : "lt",
+												"filter[3][data][value]" : oksparams.endd,
+												
+												"filter[4][field]" : "perihal",
+												"filter[4][data][type]" : 'string',
+												"filter[4][data][comparison]" : "",
+												"filter[4][data][value]" : oksparams.perihal,
+												
+												"filter[5][field]" : "reffjabatan",
+												"filter[5][data][type]" : "string",
+												"filter[5][data][comparison]" : "eq",
+												"filter[5][data][value]" : sess_reffjabatan,
+												
+												"filter[6][field]" : "status_disp",
+												"filter[6][data][type]" : "string",
+												"filter[6][data][comparison]" : "eq",
+												"filter[6][data][value]" : oksparams.status_disp
+										};
+										parms_pgrid.load(); 
+									}
+							},
+							{
+								text	: 'Reset',
+								iconCls : 'arrow_refresh',
+								handler	: function()
+								{
+									this.up('form').getForm().reset();
+								}
+							}
+					]
+				}
+			]
+	});
+	var layout = msclass.getlayout(pgrid,pformsearch,get_toolbar,iconCls,name,fsearch);		
+}

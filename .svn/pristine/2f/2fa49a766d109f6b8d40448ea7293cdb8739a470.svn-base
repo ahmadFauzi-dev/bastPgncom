@@ -1,0 +1,111 @@
+Ext.define('analisa.view.formprofilingbulk' ,{
+		extend: 'Ext.form.Panel',
+		initComponent: function() {		
+		
+			Init.storeSBU.load();
+			Init.storeArea.load();
+		
+			Ext.apply(this, {
+				frame		: false,
+				border		: false,
+				layout		: 'form',
+				frame  		: false,
+				method		: 'POST',
+				// url			: base_url+'admin/findamr',
+				bodyPadding: '5 5 0',
+				fieldDefaults: {
+					labelAlign: 'left',
+					anchor: '100%'
+				},
+				id			: 'formprofiling',
+			items: 
+				[			
+						
+					{
+						xtype		: 'datefield',
+						fieldLabel	: 'Tanggal',
+						name		: 'tanggal',
+						format		: 'Y-m-d',
+					},
+					{
+						xtype		: 'combobox',
+						fieldLabel	: 'RD',						
+						name		: 'sbu',
+						displayField: 'description',
+						valueField: 'description',
+						queryMode: 'local',									
+						store: Init.storeSBU,
+						// listeners : {
+							 // select: function(combo) 
+							// {
+								 // var values = combo.getValue(),
+								 // record = combo.findRecordByValue(values);
+								// console.log(record.data.rowid);
+								 // Init.storeArea.reload({ params : { sbu : record.data.rowid }});
+								
+							 // }
+						// }						
+					},
+					{
+						xtype		: 'textfield',
+						fieldLabel	: 'ID Station',
+						name		: 'stationid'
+					},
+					{
+						xtype		: 'textfield',
+						fieldLabel	: 'Nama Station',
+						name		: 'namastation'
+					},
+					{
+						xtype		: 'combobox',
+						id			: 'pengukurannya',
+						fieldLabel	: 'Data Pengukuran',						
+						name		: 'pengukuran',
+						displayField: 'name',
+						valueField: 'id',
+						queryMode: 'local',
+						store: new Ext.data.ArrayStore({
+									id: 0,
+									fields: [
+										'id',
+										'name'
+									],
+									data: [[0, 'Volume'], [1, 'Energy'], [2, 'GHV']]
+						}), 						
+						
+					}
+				],
+				
+				buttons		: [{
+							text	: 'Search',
+							iconCls : 'magnifier',
+							handler	: function()
+							{
+								var findform = this.up('form').getForm();
+								var oksparams = findform.getValues();																
+								var gridchartdaily = Ext.getCmp('Gridprofilingbulk').getStore();
+								gridchartdaily.getProxy().extraParams = {
+									endd : oksparams.tanggal,
+									id_pel : oksparams.stationid,									
+									namapel : oksparams.namastation,									
+									sbu : oksparams.sbu,
+									pengukuran : oksparams.pengukuran
+									};
+								gridchartdaily.loadPage(1);
+								// gridchartdaily.reload({method: 'POST'});		
+							}
+						},
+						{
+							text	: 'Reset',
+							iconCls : 'arrow_refresh',
+							handler	: function()
+							{
+								this.up('form').getForm().reset();
+							}
+						}
+				]
+		});
+
+		this.callParent(arguments);
+	}
+	});

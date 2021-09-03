@@ -1,0 +1,822 @@
+Ext.define('monitoring.view.gridpelvalidasi' ,{
+	extend: 'Ext.grid.Panel',
+	initComponent	: function()
+	{
+
+	// var days = ["","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","Nopember","Desember"];
+	
+		 Ext.define('modelGridpelval',{
+			extend	: 'Ext.data.Model',
+			fields	: ['rowid','sbu','area','streamid','fyear','fmonth','id_pel','nama_pel',
+			'keterangan', 'd1','d2','d3','d4','d5',
+			'd6','d7','d8','d9','d10','d11','d12','d13',
+			'd14','d15','d16','d17','d18','d19','d20','d21',
+			'd22','d23','d24','d25','d26','d27','d28','d29',
+			'd30','d31','total'	] });
+		var msclass 	= Ext.create('master.global.geteventmenu');
+		var storeGridpelval = Ext.create('Ext.data.JsonStore',{
+			model	: 'modelGridpelval',
+			storeId: 'areavalStore',
+			proxy: {
+				type: 'pgascomProxy',
+				// pageParam: false, 
+				// startParam: false, 
+				// limitParam: false,
+				url: base_url+'analisa/monitoring/findpelvalidasiamr',
+				reader: {
+					type: 'json',				
+					root: 'data'
+				}			
+			}
+		});		
+		
+		/* storeGridpelval.load(); */
+		
+		
+		Ext.apply(this, {
+			store	: storeGridpelval,
+			columnLines: true, 
+			id		: 'grid_pelvalidasi',	
+			title	: 'Monitoring Validasi Pelanggan',
+			dockedItems: [					
+				{
+					xtype: 'pagingtoolbar',
+					dock: 'bottom',
+					store: storeGridpelval,
+					displayInfo: true,
+					// plugins : [Ext.create('Ext.ux.PagingToolbarResizer')]
+				},
+				{
+					xtype: 'toolbar',
+					items	: [{
+						iconCls	: 'disk',
+						text	: 'Export to Excel',
+						handler	: function()
+						{
+							var extraParams = storeGridpelval.proxy.extraParams;
+							extraParams.title = 'Monitoring Validasi Pelanggan';
+							console.log(extraParams);
+							//last_day( '".$satu." ')
+							var tglawal = extraParams.startt+'-01';
+							var tglakhir = extraParams.endd+'-01';
+							if(extraParams.keterangan == 'All' || extraParams.keterangan == '')
+							{
+								 Ext.Msg.alert('Export data', 'Pilih salah satu (Volume,GHV,Energy)');
+							}else
+							{
+								msclass.exportdata('grid_pelvalidasi',"getsummarypel_validasi_data('"+extraParams.keterangan+"', '', '', '"+tglawal+"', last_day('"+tglakhir+"'), '"+extraParams.sbu+"', '"+extraParams.area+"', '1', '"+extraParams.id_pel+"', '"+extraParams.pelname+"')");
+							}
+							
+						}
+					}]
+				}],			
+			columns		: [
+				Ext.create('Ext.grid.RowNumberer',
+					{
+						header: 'No', 
+						width: 50,
+						// autoSizeColumn : true,
+					}
+					),				
+				{	
+					dataIndex : 'sbu',
+					cls   : 'header-cell',
+					align	: 'left',
+					width: 60,
+					// autoSizeColumn : true,
+					text : 'RD'					
+				},	
+				{	
+					dataIndex : 'area',
+					cls   : 'header-cell',
+					align	: 'left',
+					width: 90,
+					// autoSizeColumn : true,
+					text : 'Area'
+					
+				},
+				{	
+					dataIndex : 'fmonth',
+					cls   : 'header-cell',
+					align	: 'left',
+					width: 90,
+					// autoSizeColumn : true,
+					text : 'Bulan'
+					
+				},
+				{
+					dataIndex : 'id_pel',
+					cls   : 'header-cell',
+					align	: 'left',
+					width: 100,
+					// autoSizeColumn : true,
+					text : 'No Reff'			
+					
+				},
+				{
+					dataIndex : 'nama_pel',
+					cls   : 'header-cell',
+					align	: 'left',
+					width: 200,
+					// autoSizeColumn : true,
+					text : 'Nama Pelanggan'			
+					
+				},				
+ 				{	
+					dataIndex : 'streamid',
+					align	: 'center',
+					width	: 50,
+					text : 'Stream'					
+				},
+				{	
+					dataIndex : 'keterangan',
+					cls   : 'header-cell',
+					align	: 'left',
+					width	: 100,
+					text : 'Keterangan'					
+				},
+				{
+					dataIndex 	: 'd1',
+					text 		: '1',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;					}
+				},
+				{
+					dataIndex 	: 'd2',
+					text 		: '2',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {						
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd3',
+					text 		: '3',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd4',
+					text 		: '4',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd5',
+					text 		: '5',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd6',
+					text 		: '6',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd7',
+					text 		: '7',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd8',
+					text 		: '8',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd9',
+					text 		: '9',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd10',
+					text 		: '10',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd11',
+					text 		: '11',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd12',
+					text 		: '12',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd13',
+					text 		: '13',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd14',
+					text 		: '14',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd15',
+					text 		: '15',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd16',
+					text 		: '16',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd17',
+					text 		: '17',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd18',
+					text 		: '18',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd19',
+					text 		: '19',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd20',
+					text 		: '20',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd21',
+					text 		: '21',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd22',
+					text 		: '22',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd23',
+					text 		: '23',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd24',
+					text 		: '24',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd25',
+					text 		: '25',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd26',
+					text 		: '26',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd27',
+					text 		: '27',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd28',
+					text 		: '28',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd29',
+					text 		: '29',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd30',
+					text 		: '30',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},					
+				{
+					dataIndex 	: 'd31',
+					text 		: '31',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						if (ress[1] === "Taksasi") {						
+							metaData.style = 'background:#ffe2e2;';
+							metaData.tdAttr = 'data-qtip="' + 'Taksasi/Koreksi"';
+						} else if (ress[1] === "Good") {
+							metaData.style = 'background:#7cf991;';
+							metaData.tdAttr = 'data-qtip="' + 'Good"';						
+						} else if (ress[1] === "Warning") {
+							metaData.style = 'background:#fff56d;';
+							metaData.tdAttr = 'data-qtip="' + 'Warning"';
+						}
+						return value !== null || value !== undefined || value !== '' ? ress[0] : value;
+					}
+					
+				},
+				{
+					dataIndex 	: 'total',
+					text 		: 'Total',
+					cls   	: 'header-cell',
+					width	: 50,
+					renderer: function(value, metaData, record, row, col, store, gridView) {							
+						var ress = value.split("|");
+						
+						return  ress[0] ;
+					}
+					
+				}
+				
+			],
+		
+	
+		viewConfig : {
+			stripeRows: false,
+			// getRowClass: function(record) {
+				// return 'wordwrap';
+			 // },
+			listeners : {
+				
+				refresh: function(dataview) {
+					Ext.each(dataview.panel.columns, function(column) {
+						if (column.autoSizeColumn === true)
+							column.autoSize();
+						})
+					}			
+			}
+		}
+			
+		});
+		this.callParent(arguments);
+	}
+})

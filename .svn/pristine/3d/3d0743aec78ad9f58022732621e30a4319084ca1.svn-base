@@ -1,0 +1,358 @@
+Ext.define('analisa.rtpk.view.gridvalidrtpk' ,{
+	extend: 'Ext.panel.Panel',    
+	initComponent	: function()
+	{
+		
+		var gridrtpkrejecto = Ext.create('analisa.rtpk.view.rejecto');	
+		var msclass = Ext.create('master.global.geteventmenu'); 
+		var event = Ext.decode(msclass.getevent(Init.idmenu));
+		
+		var d = new Date();
+		var m = (d.getMonth()+1).toString();
+		if (m.length < 2 ) { m = '0'+m;}
+		var f = d.getFullYear()+'-'+m+'-'+d.getDate();	
+		
+		var queryy = " getvaldy_avr('', '', '"+f+"', '"+f+"', '', '', '1,2', '', '', 1, 1) ";
+		
+		var modelGridrtpkDaily = msclass.getmodel(queryy);
+		modelGridrtpkDaily.push({name : 'selectopts',type:'boolean'},{name : 'kategori',type:'string'},{name : 'field',type:'string'},{name : 'field',type:'string'});
+		var modelValidateDetail = msclass.getmodel('tmp_keldatartpk');
+		var columnss 	 = msclass.getcolumngrid('gridValidatertpk',queryy);		
+		var columnsdetail 	 = msclass.getcolumn('tmp_keldatartpk');		
+		var filters 		 = [];		
+		var filter 		 = [{
+			"filter[0][field]" : "status_alert",
+			"filter[0][data][type]" : "numeric",
+			"filter[0][data][comparison]" : "eq",			
+			"filter[0][data][value]" : 2,
+		}];		
+		var storeGridrtpkDaily = msclass.getstore(modelValidateDetail,'tmp_keldatartpk',filters);
+		var storeGridValidate = msclass.getstore(modelGridrtpkDaily,queryy,filter);
+		
+		// console.log(modelGridrtpkDaily);
+		// storeGridValidate.load();
+		
+		var gridDetailHourlyValidate = Ext.create('Ext.grid.Panel',{
+			store	: storeGridrtpkDaily,
+			loadMask: true, 
+			id		: 'gridHourlyValidate',		
+			columns		: columnsdetail
+		
+		});	
+		
+		// columnss[0].hidden = true;
+		// columnss[1].hidden = true;
+		// columnss[2].hidden = true;
+		columnss[3].renderer = function(value, metaData, record, rowIdx, colIdx, store, view){					
+					var color = '';
+					if(record.get('status_alert') == "2")
+					{
+						color = base_url+'asset/ico/green_indicator.ico';
+					}else if(record.get('status_alert') == "1")
+					{
+						color = base_url+'asset/ico/yellow_indicator.ico';
+					}else
+					{
+						color = base_url+'asset/ico/red_indicator.ico';
+					}
+					return '<div><img src='+color+' width="16px" height="16px"></div>';					
+				};
+		//columnss[4].text = 'RD';
+		
+		var gridDataValidate = Ext.create('Ext.grid.Panel',
+		{	
+			loadMask: true, 
+			multiSelect	: true,
+			selType		: 'checkboxmodel',
+			selModel: {
+					injectCheckbox: 0,
+					pruneRemoved: false,
+					showHeaderCheckbox: false
+				},		
+			store		: storeGridValidate,
+			id			: 'gridValidatertpk',		
+			dockedItems: [
+		{
+			xtype: 'toolbar',
+			items: [
+				{
+					iconCls : 'accept',					
+					text	: 'Approve',
+					// hidden	: event.p_approve,
+					menu 	: {
+						items	: [{
+							text	: 'Approve All',
+							handler	: function()
+							{								
+								var extraparams = storeGridValidate.proxy.extraParams;
+								//console.log(storeGridrtpkDaily);
+								extraparams.limit = storeGridValidate.pageSize;
+								extraparams.start = parseInt(storeGridValidate.currentPage) - 1;
+								extraparams.stat  = 2;				
+									
+									console.log(extraparams);
+									extraparams.id = 'gridValidatertpk';
+								var url = base_url+'analisa/rtpk/updateapprovalAll';
+								msclass.savedata(extraparams,url);
+							}
+						},
+						{
+							text	: 'Approve Selected',
+							handler	: function()
+							{								
+								var items = [];
+								storeGridValidate.each(function(record){
+									
+									if (record.data.selectopts == true)
+									{
+										items.push(record.data);
+									}
+								});
+								console.log(items);
+								
+								Ext.Ajax.request({ 
+									url			: base_url+'analisa/rtpk/updateapproval',
+									method: 'POST',
+									params:{
+										data : Ext.encode(items)
+									},
+									success: function(response,requst){										
+										// console.log(response.responseText);
+										var message = Ext.decode(response.responseText);
+										// console.log(message.success);
+										if(message.success == false)
+										{
+											Ext.Msg.alert('Error','Data sudah di Approve oleh user lain');
+										}else
+										{
+											Ext.Msg.alert('Sukses','Data Telah di Approve');
+											
+										}
+										storeGridValidate.removeAll();								
+										storeGridValidate.reload();
+									},
+									failure: function(response,requst)
+									{										
+										Ext.Msg.alert('Fail !','Input Data Gagal '+response);	
+										
+									}										
+								}); 
+							}
+						}]
+					}
+	
+				},{
+					text: 'Reject',
+					iconCls : 'cancel',
+					// hidden	: event.p_reject,
+					handler : function() 
+					{
+						
+							Ext.Msg.show({
+								 title:'Warning'
+								,msg:'Anda Yakin..?'
+								,buttons:Ext.Msg.YESNO
+								,callback:function(btn) {
+									if('yes' === btn) {
+										
+						Init.storeGridCopy = Ext.getCmp('gridrtpkrejecto').getStore();
+						var tabbbPanel = Ext.getCmp('TabAsikAja');
+						// tabbbPanel.remove('gridrejecto', true);
+						var items = [];
+						// var exist = false;
+						Init.storeGridCopy.removeAll();
+						storeGridValidate.each(function(record){
+							
+							if (record.data.selectopts == true)
+							{
+								// tabbbPanel.add(gridrejecto);
+								Init.storeGridCopy.add(record.copy());
+								// items.push(record.data);
+								//console.log(record.data);
+							}
+						});
+						
+						/* tabbbPanel.items.each(function(c){
+							if (c.title == 'AMR Reject') {
+								tabbbPanel.setActiveTab('gridrejecto');
+								exist = true;
+							} else {
+								exist = false;
+							}
+						}); */
+
+						storeGridValidate.removeAll();								
+						storeGridValidate.reload();				
+						
+						if (!Init.existtabreject) {							
+							tabbbPanel.add(gridrtpkrejecto);
+							tabbbPanel.child('#gridrtpkrejecto').tab.show();							
+							tabbbPanel.setActiveTab('gridrtpkrejecto');
+							Init.existtabreject = true;
+						} else {
+							tabbbPanel.child('#gridrtpkrejecto').tab.show();							
+							tabbbPanel.setActiveTab('gridrtpkrejecto');
+							
+						}
+						
+									}
+								}
+							});
+						
+						
+
+					}
+				},{
+					text	: 'Export',
+					// hidden	: event.p_export,
+					iconCls : 'page_white_excel',
+					xtype : 'button',					
+					handler: function (){						
+						// console.log(Init.specialparams);
+						window.location.href = base_url+'analisa/rtpk/toexcel?typeexport=Validate&filter='+Ext.encode(Init.specialparams);
+					}
+				}			
+			]
+		},
+		{
+			xtype: 'pagingtoolbar',
+			dock: 'bottom',
+			store: storeGridValidate,
+			displayInfo: true,
+			plugins : [Ext.create('Ext.ux.PagingToolbarResizer')]
+		}],			
+			columns		: columnss,
+			viewConfig: {
+				listeners: {
+					refresh: function(dataview) {
+						Ext.each(dataview.panel.columns, function(column) {
+							if (column.autoSizeColumn === true)
+								column.autoSize();
+						})
+					}
+				}
+			},
+			listeners	: 
+			{
+
+			/* selectionchange: function (sm, records, options) {
+				var rec = records[0];
+				console.log('selectionchange fired '+ rec);
+			}, 
+			beforeselect: function(model, record, index, eOpts) {
+				if (record.data.stat == 0) {//replace this with your logic.
+					return false;
+				}
+			},*/
+			itemclick : function(model, record, index, eOpts)
+			{
+				// darecord = record.data ;
+				// storeGridAnomaliDetail.reload({params:{
+								// id : record.data.reffrtpkalertid
+				// }});
+				/*storeGridHourlyValidate.removeAll();
+				storeGridHourlyValidate.reload({params:{
+								id_pel : record.data.id_pel,
+								tanggal : record.data.tanggal,
+								stream  : record.data.stream
+				}}				
+				);*/
+				record.set('selectopts',true);
+				
+				
+			},
+			select: function (model, record, index, eOpts) {
+				
+				// dataselect = record.data;
+				
+				// storeGridAnomaliDetail.reload({params:{
+								// id : record.data.reffrtpkalertid
+				// }});
+				
+				// if (showDetailOK === 1){
+				// storeGridHourlyValidate.removeAll();
+				// storeGridHourlyValidate.reload({params:{
+								// id_pel : record.data.id_pel,
+								// tanggal : record.data.tanggal,
+								// stream  : record.data.stream
+				// }}
+				// );
+				
+				// }
+				
+				// record.set('approved',1);
+				record.set('selectopts',true);
+				// console.log(record.data.selectopts);
+				
+			},
+			deselect: function (view, record, item, index, e, eOpts) {
+				//console.log('deselect fired'+index);
+				//record.data.selectopts = false;
+				record.set('selectopts',false);
+			}
+			 
+		}		
+			}); 		
+		
+		
+		
+		// storeGridDaily.load();
+		Ext.apply(this,{
+			title  		: 'Non AMR Data Validate',			
+			frame: true,			
+			iconCls 	: 'application_view_gallery',
+			layout: 'border',
+			defaults: {
+                collapsible: true,
+                split: true,
+                //bodyStyle: 'padding:5px'
+            },
+			items: [
+				{
+					xtype : 'panel',
+					title : 'Data Validate',
+					frame	: true,
+					region : 'center',
+					layout: 'fit',
+					collapsible: false,
+					flex: 3,					
+					// autoScroll : true,
+					border: false,
+					items: gridDataValidate
+					
+				},				
+				{
+					xtype : 'panel',
+					autoScroll : true,
+					region : 'south',
+					frame	: true,
+					border	: false,
+					title : 'History Pencatatan',
+					layout: 'fit',					
+					flex: 1,
+					items : []
+					// items : gridDetailHourlyValidate
+					// ,
+					// tools: [
+					// {
+						// type:'gear',
+						// tooltip: shide+' Detail',
+						// callback: function() {
+							// if (showDetailOK === 1 ){
+								// showDetailOK = 0;
+								// shide = 'Show';
+								// console.log(showDetailOK + shide);
+							// } else { 
+								// showDetailOK = 1; 
+								// shide = 'Hide';
+								// console.log(showDetailOK + shide);
+							// } 							
+						// }
+					
+					// }]
+				}
+			]
+		});
+		this.callParent(arguments);
+	}
+});

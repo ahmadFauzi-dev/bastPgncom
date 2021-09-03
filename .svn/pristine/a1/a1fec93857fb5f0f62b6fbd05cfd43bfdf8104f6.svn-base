@@ -1,0 +1,55 @@
+function apps(name, iconCls) {
+     
+    var formtaksasinonamr = Ext.create('analisa.nonamr.view.formtaksasinonamr');
+    var gridtaksasinonamr = Ext.create('analisa.nonamr.view.gridtaksasinonamr');	
+    
+	
+    var tabPanel = Ext.getCmp('contentcenter');
+	tabPanel.items.each(function(c){
+		if (c.title != 'Home') {
+			tabPanel.remove(c);
+		}
+	});
+    var items = tabPanel.items.items;
+    var exist = false;
+    if (!exist) {
+		tabPanel.add({
+            title: name,
+            id: '657',
+            xtype: 'panel',
+            iconCls: iconCls,
+            closable: true,
+            layout: 'border',
+            // overflowY	: 'scroll',
+            defaults: {
+                collapsible: true,
+                split: true,
+                //bodyStyle: 'padding:5px'
+            },
+            // bodyPadding: '5 5 0',
+            items: [{
+                xtype: 'panel',
+                title: 'Form Search',
+                flex: 1,
+				id  : 'searchformtaksasinonamr',
+                region: 'west',
+                // layout 		: 'fit',
+                bodyStyle: 'padding:5px',
+                //width			: 600,
+                // margins		: '10',
+                items: formtaksasinonamr
+                //items			: []
+            }, {
+                xtype: 'tabpanel',
+                flex: 3,
+				id : 'tabkoreksitaksasinonamr',
+                collapsible: false,	
+                region: 'center',
+				activeTab	: 0,				
+				fit		: true,							
+                items: [ gridtaksasinonamr ]
+            }]
+        });
+        tabPanel.setActiveTab('657');
+    }
+}

@@ -1,0 +1,121 @@
+Ext.define('simpel.surat_masuk.formduploadaddsm' ,{
+	
+	extend: 'Ext.form.Panel',
+	initComponent: function() {	
+			var pageId = Init.idmenu;
+			//console.log(pageId);
+			//store_rekanan_m
+			var msclass = Ext.create('master.global.geteventmenu'); 
+			var filter = [];
+			
+			var store = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				data : [
+					{"id":"Y", "name":"Y"},
+					{"id":"N", "name":"N"}
+				]
+			});
+			
+			
+												
+		Ext.apply(this, {
+				xtype : 'form',
+				header:false,
+				frame : true,
+				id:'formduploadaddsm'+pageId,
+    			fileUpload : true,
+				defaultType : 'textfield',
+				url			: base_url+'simpel/form_dupload',
+				method		: 'POST',
+				bodyPadding: '5 5 0',
+				fieldDefaults: {
+					labelAlign: 'left',
+				},
+				items		: [
+					{
+						fieldLabel	: 'rowid',
+						id		: 'rowid_uploadtaddsm'+pageId,
+						name		: 'rowid',
+						//value		:  no_usulan,
+						hidden	: true
+					},
+					{
+						xtype: 'filefield',
+						//id: 'url_documenttaddsm'+pageId,
+						disabled:false,
+						afterLabelTextTpl: required,
+						width: 460,
+						fieldLabel: 'Dokumen',
+						name: 'url_document',
+						buttonText: 'Unggah'
+					},
+					{
+						xtype: 'combobox',
+						fieldLabel: 'Active',
+						id: 'activetaddsm'+pageId,
+						name: 'active',
+						width: 150,
+						store: store,
+						valueField: 'id',
+						displayField: 'name',
+						queryMode: 'local'
+					},
+					{
+						xtype: 'textareafield',
+						fieldLabel: "Description",
+						id: "descriptiontaddsm"+pageId,
+						name: "description",
+						grow: true,
+						width: 460,
+						height: 250
+					}],
+					buttons		: [
+					{
+						text: 'Upload',
+						id: 'BtnUploadaddsm'+pageId,
+						disabled:false,
+						iconCls:'folder_go',
+						//hidden:!ROLE.DRAFT_DATA,
+						handler: function(){
+							if(this.up('form').getForm().isValid()){
+								this.up('form').getForm().submit({
+									waitTitle	 	: 'Harap Tunggu',
+									waitMsg 	: 'Upload data',
+									success	:function(response,opt)
+									{
+										var ar = Ext.JSON.decode(opt.response.responseText);
+										var store = Ext.getCmp('gridattdokumenaddsm'+pageId).getStore();
+										var gridatt = Ext.getCmp('gridattdokumenaddsm'+pageId);
+										//console.log(ar.nama);
+										var r = {
+														rowid : '',
+														name : ar.data.name,
+														reffsurat : '',
+														str_surat : '',
+														url_document : ar.data.url_document,
+														description : ar.data.description,
+														active : ar.data.active
+										}
+										store.insert(0, r);
+										Ext.Msg.alert('Sukses','Upload Sukses');
+										Init.winss_formuploadaddsm.close();
+									},
+									failure:function(response,opt)
+									{
+										//console.log(action);
+										Ext.Msg.alert('Warning!', 'Authentication server is unreachable : ' + opt.response.responseText + "");
+									}
+								});
+						
+							}
+						}
+
+					} 
+				]
+		});
+
+		this.callParent(arguments);
+
+		
+	}
+});

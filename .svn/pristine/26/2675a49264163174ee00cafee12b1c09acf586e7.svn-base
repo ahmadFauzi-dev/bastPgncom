@@ -1,0 +1,220 @@
+Ext.define('simpel.surat_masuk.formaddpesertadisposisi' ,{	
+	extend: 'Ext.form.Panel',
+	initComponent: function() {	
+
+			var pageId = Init.idmenu;
+			//store_rekanan_m
+			var msclass = Ext.create('master.global.geteventmenu'); 
+			var filter = [];
+			var gridattdokumensm = Ext.create('simpel.surat_masuk.gridattdokumenadddisposisi');
+			var griddisposisi = Ext.create('simpel.surat_masuk.griddisposisiap');
+			
+		Ext.apply(this, {
+				xtype		: 'form',
+				frame		: false,
+				url			: base_url+'simpel/add_pesertadisposisi',
+				collapsed :false,
+				border		: false,
+				title		: "Tambah Peserta Disposisi",
+				autoScroll	:true,
+				fileUpload	: true,
+				frame  		: false,
+				method		: 'POST',
+				//bodyPadding: '5 5 0',
+				fieldDefaults: {
+					labelAlign: 'left',
+					anchor: '60%'
+				},
+				id	: 'formaddpesertadisposisi',
+				flex : 1,
+				defaultType : 'textfield',
+				items : [
+				{		
+						xtype		: 'fieldset',
+						defaultType	: 'textfield',
+						//id			: 'fieldsetformNewRelocation',
+						border		: false,
+						layout		: 'anchor',
+						defaults: {
+							anchor: '100%'
+						},
+						items		: [
+							{
+								xtype: 'textfield',
+								fieldLabel: "rowid",
+								name: "rowid",
+								hidden : true	
+							},
+							{
+								xtype: 'textfield',
+								fieldLabel: "reffsurat",
+								name: "reffsurat",
+								hidden : true	
+							},
+							{
+								xtype: 'textfield',
+								fieldLabel: "reffsuratkeluar",
+								name: "reffsuratkeluar",
+								hidden : true	
+							},
+							{
+								xtype: 'textfield',
+								fieldLabel: "reffdisposisi",
+								name: "reffdisposisi",
+								hidden : true
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "Jabatan",
+								name: "nama_jabatantujuan",
+								fieldStyle: 'background:none'								
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "Satuan Kerja",
+								name: "str_tujuansurat",
+								fieldStyle: 'background:none'								
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "No Surat",
+								name: "no_surat",
+								fieldStyle: 'background:none'								
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "No Surat Masuk",
+								name: "no_disposisi",
+								fieldStyle: 'background:none'								
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "Perihal",
+								name: "perihal",
+								grow: true
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "Sifat",
+								name: "str_sifat",
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "Keamanan",
+								name: "nama_keamanan",
+							},
+							{
+								xtype: 'textfield',
+								fieldLabel: "keamanan",
+								name: "keamanan",
+								hidden : true
+							},
+							{
+								xtype: 'textfield',
+								fieldLabel: "reffjenispenerima",
+								name: "reffjenispenerima",
+								hidden : true
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "Satuan Kerja",
+								name: "str_satuankerja"
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: 'Tanggal Surat',
+								name: 'tanggal_surat'
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: 'Tanggal Surat Masuk',
+								name: 'waktu_terima'
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: "Jenis Surat",
+								name: "str_jenissurat"
+							},
+							{
+								xtype: 'displayfield',
+								fieldLabel: 'Isi Surat Disposisi',
+								//id: "tujuan_external"+pageId,
+								name: "disposisi_file",
+								//hidden : false,
+								grow: true,
+								//width: 700,
+								height: 50,
+								renderer : function(value, metaData, record ){
+									if(value!=null){
+										var url = base_url+"asset/pdfs/"+value;
+										return '<a href="'+url+'" target="_blank">Tampilkan Isi Surat</a>';
+										//console.log(value);
+									}
+									else{
+										return '-';
+									}
+								}
+							},
+							{
+								xtype: 'fieldcontainer',
+								fieldLabel: 'Lampiran',
+								//layout: 'hbox',
+								items: gridattdokumensm
+							},
+							{
+								xtype: 'fieldcontainer',
+								fieldLabel: 'Disposisi',
+								//layout: 'hbox',
+								//id: 'griddisposisism'+pageId,
+								items: griddisposisi
+							},
+							{
+								xtype: 'textareafield',
+								fieldLabel: 'Komentar',
+								name: 'komentar',								
+								//id: 'komentarsm'+pageId,
+							}]
+				}],
+                buttons			: [
+							{
+								text: 'Disposisi',
+								id: 'btnaddpesertadispo',
+								disabled:false,
+								border : true,
+								iconCls:'disk',
+								//hidden:!ROLE.DRAFT_DATA,
+								handler: function(){									
+									var griddispo = Ext.getCmp('griddisposisiap');
+									var disporec = griddispo.getView().getSelectionModel().getSelection();							
+									var disposisi = [];
+									
+									Ext.Array.each(disporec, function(record){
+										//console.log(record.data);
+										disposisi.push(record.data);
+									});
+									
+									if(this.up('form').getForm().isValid()){
+										this.up('form').getForm().submit({
+											waitTitle	: 'Harap Tunggu',
+											params:{
+												datadisposisi : Ext.encode(disposisi)
+											},
+											waitMsg		: 'Insert data', 
+											success	:function(form, action)
+											{
+												Ext.Msg.alert('Sukses','Sudah Didisposisi');
+												Init.winss_formaddpesertadisposisi.close();
+												Ext.getCmp('idgrid_addpesertadisposisi').getStore().reload();
+											},
+											failure:function(form, action)
+											{
+												Ext.Msg.alert('Warning!', 'Authentication server is unreachable : ' + action.response.responseText + "");
+											}
+										});
+									}
+								}
+							}]				
+		});												
+		this.callParent(arguments);
+	}
+});

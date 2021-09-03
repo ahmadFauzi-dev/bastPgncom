@@ -1,0 +1,59 @@
+Ext.define('analisa.bulk.view.griddokref' ,{
+    extend: 'Ext.grid.Panel',
+	id    : Init.idmenu+'grid',
+    initComponent: function() {
+	var filter 		= [];
+	var data;
+	var msclass 	= Ext.create('master.global.geteventmenu');
+	var model 		= msclass.getmodel('v_docreff');
+	var store 		= msclass.getstore(model,'v_docreff',filter);
+	var columns = msclass.getcolumn('v_docreff');
+	model.push('selectopts');
+	//storemstation.reload();
+	//store.load();
+	var d = new Date();
+	var n = d.getTime();
+	console.log(n);
+	Ext.apply(this, {
+			store		: store,
+			multiSelect	: true,
+			id			: ''+Init.idmenu+'griddokref',
+			columns		: [
+			{
+            xtype:'actioncolumn', 
+            width:50,
+			items: [{
+					icon: base_url+'asset/icons/page_save.png',  // Use a URL in the icon config
+					tooltip: 'Save',
+					handler: function(grid, rowIndex, colIndex) {
+						var rec = grid.getStore().getAt(rowIndex);
+						//console.log(rec.get('docpath'));
+						 //window.location = rec.get('docpath');
+						  window.open(rec.get('docpath'),'_blank');
+						//alert("Edit " + rec.get('firstname'));
+					}
+				}]
+			},
+			{
+				text	: 'Document Name',
+				dataIndex : 'docname'
+			},
+			{
+				text	: 'Upload Date',
+				dataIndex	: 'credate'
+			},
+			{
+				text	: 'Di Upload',
+				dataIndex	: 'creperson'
+			}],
+			//plugins	: editing,
+			bbar: Ext.create('Ext.PagingToolbar', {
+				pageSize: 10,
+				store: store,
+				displayInfo: true
+			})
+	});
+
+       this.callParent(arguments);
+    }
+});

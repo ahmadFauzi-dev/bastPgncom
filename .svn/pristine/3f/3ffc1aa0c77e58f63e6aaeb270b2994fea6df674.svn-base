@@ -1,0 +1,216 @@
+Ext.define('analisa.offtake.view_gaskomp.gridvalidkomp' ,{
+	 extend			: 'Ext.grid.Panel',
+	 id    			: Init.idmenu+'gridvalidkomp',
+	 initComponent: function() {
+		var filter 		= [];
+		var msclass 		= Ext.create('master.global.geteventmenu');
+		var model 			= msclass.getmodel('v_gaskomposisidaily');
+			model.push('selectopts');
+			model.push('field');
+			model.push('kategori');
+			model.push('keterangan');
+		var columns 		= msclass.getcolumn('v_gaskomposisidaily');	
+		var coldisplay		= [];
+		var store 		  	= msclass.getstore(model,'v_gaskomposisidaily',filter);
+		store.getProxy().extraParams = {
+		view : "v_gaskomposisidaily",
+			
+			"filter[0][field]" : "statusapproval",
+			"filter[0][data][type]" : "boolean",
+			"filter[0][data][comparison]" : "eq",
+			"filter[0][data][value]" :'NULL',
+			
+			"filter[1][field]" : "statusdata",
+			"filter[1][data][type]" : "string",
+			"filter[1][data][comparison]" : "eq",
+			"filter[1][data][value]" :'1',
+			
+			
+		};	
+		store.load();
+		
+		columns[1].hidden	= true;
+		columns[3].text = "Kode Station";
+
+		coldisplay[0] = columns[0];
+		
+		coldisplay[1] = {
+			dataIndex	: "statusdata",
+			width		: 20,
+			locked   : true,
+			renderer : function(value, metaData, record, rowIdx, colIdx, store, view){
+				
+				//metaData.tdAttr= 'data-qtip="'+message+'"';
+				var color = '';
+				if(record.get('statusdata') == "1")
+				{
+					color = base_url+'asset/icons/flag_green.png';
+				}else if(record.get('statusdata') == "0")
+				{
+					color = base_url+'asset/icons/flag_red.png';
+				}else
+				{
+					color = base_url+'asset/icons/flag_purple.png';
+				}
+				//color = base_url+'asset/ico/green_indicator.ico';
+				return '<div><img src='+color+' width="15px" height="15px"></div>';
+				
+			}
+		}
+		coldisplay[2] = columns[3];
+		coldisplay[2].hidden = true;
+		coldisplay[2] = {
+			text	: 'Nama Station',
+			dataIndex	: columns[4].dataIndex,
+			locked	: true
+		}
+		coldisplay[3] = columns[5];
+		coldisplay[3].text = "RD";
+		
+		coldisplay[4] = columns[7];
+		coldisplay[4].text = "Jenis Station";
+		coldisplay[4].locked = true;
+		
+		coldisplay[5] = columns[9];
+		coldisplay[5].text = "Tanggal Pencatatan";
+		//coldisplay[4].flex = 1;
+		coldisplay[5].locked = true;
+		
+		
+		
+		
+		coldisplay[6] = 
+		{
+			text	: "Gas Komposisi",
+			columns	: [
+			/*
+			{
+				text	: "Pressure",
+				dataIndex	: "pressure"
+			},
+			{
+				text	: "Temperatur",
+				dataIndex	: columns[11].dataIndex
+			},
+			{
+				text	: "Kalori",
+				dataIndex	: columns[12].dataIndex
+			},
+			*/
+			columns[13],
+			columns[14],
+			columns[15],
+			columns[16],
+			columns[17],
+			columns[18],
+			columns[19],
+			columns[20],
+			columns[21],
+			
+			
+			]
+		};
+		coldisplay[7] = 
+		{
+			text : "Total",
+			dataIndex : "total"
+		}
+		
+		//console.log(columns);
+		
+		Ext.apply(this, {
+			store		: store,
+			//multiSelect	: true,
+			selType		: 'checkboxmodel',
+			multiSelect	: true,
+			height		: 300,
+			autoScroll	: true,
+			closable		: true,
+			id			: ''+Init.idmenu+'gaskompgridanomali',
+			dockedItems	: [
+				{
+					xtype: 'toolbar',
+					items	: [{
+						text	: 'Export',
+						iconCls	: 'page_white_excel',
+						handler	: function()
+						{
+							msclass.exportdata(''+Init.idmenu+'gaskompgridanomali');
+						}
+					},
+					/*
+					{
+						text	: 'Approve',
+						iconCls	: 'accept',
+						handler	: function()
+						{
+							store.each(function(record){
+							  
+							  if(record.data.selectopts == true)
+							  {
+								console.log(record.data);
+								msclass.savedata(record.data,base_url+'admin/inserttofingaskomp');
+								//msclass.savedata(record.data,base_url+'admin/inserttofin');	
+								store.reload();
+							  }
+							  
+							});
+							
+							store.reload();
+							store.reload();
+							
+							Ext.MessageBox.alert('Notification', 'Approved');
+						}
+					},
+					{
+						text	: 'Reject',
+						iconCls	: 'cancel',
+						handler	: function()
+						{
+							msclass.rejectgaskomp(''+Init.idmenu+'gaskompgridanomali');
+						}
+					},
+					*/
+					{
+						text	: 'Penyaluran Hourly',
+						iconCls	: 'application_form_magnify',
+						handler	: function()
+						{
+							//console.log(data);
+							msclass.penyaluranhourly(data);
+						}
+					}]
+				}
+			],
+			columns		: coldisplay,
+		
+			bbar: Ext.create('Ext.PagingToolbar', {
+				pageSize: 10,
+				store: store,
+				displayInfo: true
+			}),
+			listeners	: 
+			{
+				beforeitemcontextmenu: function(view, record, item, index, e)
+				{
+					e.stopEvent();
+					data = record.data;
+					medugridkelengkapan.showAt(e.getXY());
+				},
+				itemclick	: function(view, record, item, index, e, eOpts)
+				{
+					data = record.data;
+				},
+				select: function (model, record, index, eOpts) {
+					record.set('selectopts',true);
+				},
+				deselect: function (view, record, item, index, e, eOpts) {
+					
+					record.set('selectopts',false);
+				}
+			}
+		});
+		this.callParent(arguments);
+		
+	}
+});

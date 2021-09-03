@@ -1,0 +1,188 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+class Project_monitoring extends MY_Controller {
+function __construct() {		
+        parent::__construct();        
+    }
+	
+		public function index()
+		{
+			vd::dump($this->session->userdata('karyawan_id'));
+		}
+		
+		public function process_action()
+		{
+			
+			$this->load->model('b_model');
+			$this->load->helper('security');
+			$rowid =  $this->input->post('rowid');
+			
+			
+			if($rowid == '0'){
+				$data_proj = array
+				(
+					'salutionarea_id' => $this->input->post('salutionarea_id',true),		
+					'nama_project' => $this->input->post('nama_project',true),		
+					'status' => $this->input->post('status',true)		
+				);
+				// vd::dump($filter);
+				$whereid = $this->b_model->insert_data('project_monitoring.proj_monitoring', $data_proj);
+				$proj_id = $this->b_model->get_tgid('project_monitoring.document_status','project_id',$whereid);
+				$project_id = $proj_id['get_id'];
+			}
+			else{
+				$filter[0]['field'] = "rowid";
+				$filter[0]['data'] = array("comparison"	=> "eq",
+									   "type"		=> "string",
+									   "value"		=> $rowid);
+				
+				$data_proj = array
+				(
+					'salutionarea_id' => $this->input->post('salutionarea_id',true),		
+					'nama_project' => $this->input->post('nama_project',true),		
+					'status' => $this->input->post('status',true)		
+				);
+				// vd::dump($filter);
+				$this->b_model->update_data('project_monitoring.proj_monitoring', $filter ,$data_proj);
+				$project_id = $rowid;
+			}
+			
+			$stat[1]	= 0;
+			$stat[2]	= $this->input->post('stat_aanwijzing_pgn',true);
+			$stat[3]	= $this->input->post('stat_soluproposal_tc_pgascom',true);
+			$stat[4]	= $this->input->post('stat_klarinegosiasi_pgascom_pgn',true);
+			$stat[5]	= $this->input->post('stat_perjkerjasama_pgascom_pgn',true);
+			$stat[6]	= $this->input->post('stat_spk_pgn',true);
+			$stat[7]	= $this->input->post('stat_pelakpekerjaan_pgascom_patner',true);
+			$stat[8]	= $this->input->post('stat_acceptance_pgascom_pgn',true);
+			$stat[9]	= $this->input->post('stat_pay_pgn',true);
+			$stat[10]	 =$this->input->post('stat_operation_pgn',true);
+			$stat[11]	 =$this->input->post('stat_maintenance_pgascom',true); 
+			
+				 
+				
+			for ($i = 1; $i<=11;$i++){
+				
+				$filter_status[0]['field'] = "project_id";
+				$filter_status[0]['data'] = array("comparison"	=> "eq",
+									   "type"		=> "numeric",
+									   "value"		=> $project_id);
+				$filter_status[1]['field'] = "document_type";
+				$filter_status[1]['data'] = array("comparison"	=> "eq",
+									   "type"		=> "numeric",
+									   "value"		=> $i);
+									   
+				$data_status = array
+				(
+					'status_id' => $stat[$i]
+				);
+				// vd::dump($filter);
+				if ( $stat[$i] != '' || $stat[$i] != null){
+					$this->b_model->update_data('project_monitoring.document_status', $filter_status,$data_status);
+				}
+			}
+			
+			$json   = array( 'success' => TRUE, 'proj_id' => $project_id
+			);
+						
+			echo json_encode($json);
+		}
+		
+		public function update_entry()
+		{
+			
+			$this->load->model('b_model');
+			$this->load->helper('security');
+			$rowid =  $this->input->post('rowid');
+			$filter[0]['field'] = "rowid";
+			$filter[0]['data'] = array("comparison"	=> "eq",
+								   "type"		=> "string",
+								   "value"		=> $rowid);
+				
+			$data_proj = array
+			(
+				'status' => $this->input->post('status',true)		
+			);
+			// vd::dump($filter);
+			$this->b_model->update_data('project_monitoring.proj_monitoring', $filter ,$data_proj);
+			
+			$json   = array( 'success' => TRUE, 'proj_id' => $project_id
+			);
+						
+			echo json_encode($json);
+		}
+		public function deletedata()
+		{
+			$this->load->model('b_model');
+			$this->load->helper('security');
+						
+			$filter = $this->input->post('filter', TRUE) > '' ? $this->input->post('filter', TRUE) : array();
+			$table = $this->input->post('tbl');
+			$log = $this->b_model->delete_data($table, $filter);
+			
+			$json   = array( 'success' => TRUE
+			);
+						
+			echo json_encode($json);
+		}
+		public function complete_document()
+		{
+			$this->load->model('b_model');
+			$this->load->helper('security');
+						
+			$filter = $this->input->post('filter', TRUE) > '' ? $this->input->post('filter', TRUE) : array();
+			$table = $this->input->post('tbl');
+			$data = array ('status_id' => '2');
+			$log = $this->b_model->update_data($table, $filter,$data);
+			
+			$json   = array( 'success' => TRUE
+			);
+						
+			echo json_encode($json);
+		}
+		public function upload_document()
+		{
+			$this->load->model('b_model');
+			$this->load->helper('security');
+			$user_id = $this->session->userdata('user_id');
+			
+			$project_id = $this->input->post('project_id');			
+			$document_typeid = $this->input->post('document_typeid');			
+			$document_name = $this->input->post('document_name');			
+			$description = $this->input->post('description');
+			
+			$filename = $_FILES['url_document']['name'];
+			//$ext = pathinfo($filename, PATHINFO_EXTENSION);
+			$ext 									= date('YmdHisu');
+			$direktori 			  		 		= 'document/upload/';
+			$config['upload_path']      = $direktori;
+			$config['file_name']        	= $ext."^".str_replace(' ','_',$filename);
+			$config['allowed_types'] 	= 'gif|jpg|png|xls|xlsx|doc|docx|pdf';
+
+			$this->load->library('upload', $config);
+			
+			if (!$this->upload->do_upload("url_document")) {
+				$json = array('error' => $this->upload->display_errors());
+				//json_encode($error);
+			}
+			else {
+				$this->upload->data();
+				$data = array(	
+										"project_id" => $project_id,
+										"document_typeid" => $document_typeid,
+										"document_name" => $document_name,
+										"url_document" => $ext."^".str_replace(' ','_',$filename),
+										"description" => $description,
+										"create_by" => $user_id, 
+										"create_date" => date('Y-m-d H:i:s')
+				);
+				
+				$this->b_model->insert_data('project_monitoring.document_link', $data);
+				
+			}
+			$json   = array( 'success' => TRUE);
+						
+			echo json_encode($json);
+		}
+		
+		
+}

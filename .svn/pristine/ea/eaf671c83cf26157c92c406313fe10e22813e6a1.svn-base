@@ -1,0 +1,102 @@
+function apps(name, iconCls) {
+    
+   var formsearchvalid = Ext.create('analisa.offtake.view.formsearchvalid');
+   var gridvalid 	  = Ext.create('analisa.offtake.view.gridvalid');
+  // var gridtaksasi = Ext.create('analisa.bulk.view.gridvalidtaksasi');
+   //var griddokumenpendukung = Ext.create('analisa.bulk.view.griddokref');
+   var griddokumenpendukungs = Ext.create('analisa.bulk.view.griddokref');
+   
+	//var formanomaliamr = Ext.create('analisa.view.formanomaliamr');
+	//var gridanomaliamr = Ext.create('analisa.view.gridanomaliamr');
+	//var gridanomalistatus = Ext.create('analisa.view.gridanomalistatus');
+	//var gridvolumehourly = Ext.create('analisa.view.gridvolumehourly');
+	
+	// var griddetaildata = Ext.create('analisa.view.griddatadetail');
+	// var griddetaildata;
+    //var gridkelamr = Ext.create('analisa.view.gridkelamr');	
+	
+    var tabPanel = Ext.getCmp('contentcenter');
+	tabPanel.removeAll(true);
+	tabPanel.items.each(function(c){
+		if (c.title != 'Home') {
+			tabPanel.remove(c.id);
+			
+		}
+	});
+	
+    var items = tabPanel.items.items;
+    var exist = false;
+   
+    if (!exist) {
+        // Ext.getCmp('contentcenter')
+		tabPanel.add({
+            title: name,
+            id: 'validofftake',
+            xtype: 'panel',
+            iconCls: iconCls,
+            closable: true,
+            layout: 'border',
+			setLoading	: true,
+            // overflowY	: 'scroll',
+            defaults: {
+                collapsible: true,
+                split: true,
+                //bodyStyle: 'padding:5px'
+            },
+            // bodyPadding: '5 5 0',
+            items: [{
+                xtype: 'panel',
+                title: 'Form Search',
+                flex: 1,
+				id : 'searchvalidform',
+                region: 'west',
+                bodyStyle: 'padding:5px',
+				items		: [{
+					xtype	: formsearchvalid
+				}]
+				
+                //width			: 600,
+                // margins		: '10',
+                //items: formanomaliamr
+                //items			: []
+            },
+			{
+						xtype 		: 'panel',					
+						id	  		: Init.idmenu+'DataValid',
+						autoScroll 	: true,
+						layout		: 'border',
+						frame		: true,
+						border		: false,					
+						title 		: 'Data Valid',										
+						flex		: 3,
+						region: 'center',
+						items : [{
+							xtype	: 'panel',
+							flex	: 3,
+							region : 'center',
+							id		: 'gridvalid',
+							title	: 'Data Valid',
+							layout	: 'fit',
+							itemId	: 'gridvalid',
+							items	: [{
+								xtype	: gridvalid
+							}]
+						},{
+							xtype	: 'panel',
+							region  : 'east',
+							id		: 'dokpendukungvalid',
+							flex	: 1,
+							layout	: 'fit',
+							title	: 'Dokumen Pendukung',
+							itemId	: 'dokpendukung',
+							items	: griddokumenpendukungs
+						}]
+						
+						
+												
+			}]
+        });
+        tabPanel.setActiveTab('validofftake');
+		//Ext.Msg.hide();
+    }
+}

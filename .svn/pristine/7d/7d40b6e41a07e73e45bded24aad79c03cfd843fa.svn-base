@@ -1,0 +1,4 @@
+[17-Jan-2018 14:13:25 UTC] PHP Parse error:  syntax error, unexpected end of file, expecting ',' or ';' in /home/syfawija/public_html/index.php on line 3
+[17-Jan-2018 14:13:27 UTC] PHP Parse error:  syntax error, unexpected end of file, expecting ',' or ';' in /home/syfawija/public_html/index.php on line 3
+[17-Jan-2018 14:13:28 UTC] PHP Parse error:  syntax error, unexpected end of file, expecting ',' or ';' in /home/syfawija/public_html/index.php on line 3
+[17-Jan-2018 21:20:41 Asia/Jakarta] PHP Fatal error:  Call to a member function model() on a non-object in /home/syfawija/public_html/application/modules/test/controllers/test.php on line 6

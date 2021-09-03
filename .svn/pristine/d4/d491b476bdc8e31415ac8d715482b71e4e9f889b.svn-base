@@ -1,0 +1,161 @@
+Ext.define('analisa.view.gridghvpelanggan' ,{
+	extend: 'Ext.grid.Panel',
+	initComponent	: function()
+	{
+		Ext.define('modelReffGHV',{
+			extend	: 'Ext.data.Model',
+			fields	: ['sbu','area','station','mstationrowid','jenis_station',
+			'id_pel', 'nama_pel','approval_station', 'fyear','fmonth',
+			'd1','d2','d3','d4','d5', 'd6','d7','d8','d9','d10','d11','d12','d13',
+			'd14','d15','d16','d17','d18','d19','d20','d21',
+			'd22','d23','d24','d25','d26','d27','d28','d29',
+			'd30','d31'			] });
+		var storeGridReffGHV = Ext.create('Ext.data.JsonStore',{
+			model	: 'modelReffGHV',
+			storeId: 'storeReffGHV',
+			proxy: {
+				type: 'pgascomProxy',
+				// pageParam: false, 
+				// startParam: false, 
+				// limitParam: false,
+				url: base_url+'admin/mapping/findreffghv',
+				reader: {
+					type: 'json',				
+					root: 'data'
+				}			
+			}
+		});	
+			
+		var asember = [];
+		
+		for (i = 1; i < 32/*jumlah_harii(d.getFullYear(),d.getMonth()+1)+1 */; i++) {
+			asember[i] = 
+			{
+				dataIndex : 'd'+i,
+				align	: 'right',				
+				text : i,
+				renderer: function(value, meta, record) {
+					return value;
+				}
+					
+			}		
+		}
+		
+		storeGridReffGHV.load();
+		var msclass 	= Ext.create('master.global.geteventmenu');
+		var d = new Date();
+		month = '' + (d.getMonth() + 1);
+		day = '' + d.getDate();
+		year = d.getFullYear();
+		
+		if	(parseInt(month) < 10)
+		{
+			month = '0' + (d.getMonth() + 1);
+		}
+		if (parseInt(d.getDate()) < 10) 
+		{
+			day = '0' + d.getDate();
+		}
+		
+		var tanggal_awal = year+'-'+month+'- 01';
+		var tanggal_akhir = msclass.formatDate(Date());		
+		Ext.apply(this, {
+			title 		: 'Data GHV',
+			store		: storeGridReffGHV,
+			iconCls 	: 'application_view_gallery',
+			multiSelect	: true,
+			// height		: 300,
+			autoScroll	: true,
+			id			: 'gridghvpelanggan',
+			dockedItems: [
+				{
+					xtype: 'toolbar',
+					items	: [
+					{
+						text	: 'Export',
+						iconCls	: 'page_white_get',
+						//disabled: true,
+						handler	: function()
+						{
+							var extraParams = storeGridReffGHV.proxy.extraParams;
+							var msclass 	= Ext.create('master.global.geteventmenu');
+							extraParams.title = 'Monitoring Validasi Pelanggan';
+							if(extraParams.startt == '')
+							{
+								extraParams.startt = tanggal_awal;
+							}
+							if(extraParams.endd == '')
+							{
+								extraParams.endd = tanggal_akhir;
+							}
+							
+							msclass.exportdata('gridghvpelanggan',"getghvperiode_penyaluran_export('','','"+extraParams.startt+"','"+extraParams.endd+"','"+extraParams.sbu+"','"+extraParams.area+"','1,2','"+extraParams.id_pel+"','"+extraParams.namapel+"','')");
+						}
+				}]
+				},
+				{
+					xtype: 'pagingtoolbar',
+					dock: 'bottom',
+					store: storeGridReffGHV,
+					displayInfo: true,
+					// plugins : [Ext.create('Ext.ux.PagingToolbarResizer')]
+				}],
+				columns		: [
+				Ext.create('Ext.grid.RowNumberer',
+					{
+						header: 'No', 
+						width: 30
+					}
+					),	
+					{	
+						dataIndex : 'sbu',
+						text : 'RD',
+						width: 70,
+						cls   : 'header-cell',						
+
+					},
+					{
+						dataIndex : 'area',
+						text : 'Area',
+						width: 100,
+						cls   : 'header-cell'					
+						
+					},
+					{
+						dataIndex : 'jenis_station',
+						text : 'Jenis Station',
+						cls   : 'header-cell',
+						width: 120
+						
+					},
+					{
+						dataIndex : 'station',
+						text : 'Station',
+						width: 120,
+						cls   : 'header-cell',
+						
+					},					
+					{
+						dataIndex : 'id_pel',
+						text : 'ID Pelanggan',
+						cls   : 'header-cell',
+						width: 120,
+						
+					},					
+					{
+						dataIndex 	: 'nama_pel',
+						text 		: 'Nama Pelanggan',
+						cls   	: 'header-cell',
+						width	: 250,
+					},
+					{	
+						align	: 'left',
+						id:'kolombulan',
+						text :  'Tanggal',//this.headerCt.getGridColumns()[0].dataIndex,
+						columns : asember	
+					}
+					]			
+		});
+		this.callParent(arguments);
+	}
+})

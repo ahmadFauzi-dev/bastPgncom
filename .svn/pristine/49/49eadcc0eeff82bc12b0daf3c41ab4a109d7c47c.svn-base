@@ -1,0 +1,199 @@
+function apps(name, iconCls){
+	var valuesimpan;
+	Ext.define('Init', {
+			valuesimpan
+	});
+	 
+	//====================| FRAMEWORK |===============================================
+	
+		var msclass 						= Ext.create('master.global.geteventmenu');
+		var pageId = Init.idmenu;
+		var v_table 						= "v_tasksuratkeluar"; 
+		var winimp;
+		var model_data = msclass.getmodel(v_table);
+		// model_data.push('selectopts');
+		var pstore = msclass.getstore(model_data,v_table,[]);
+		var cgrid = msclass.getcolumngrid('idgrid_tasksuratkeluar',v_table);	
+		var itemdocktop = [{
+			text	: 'Buka',
+			iconCls	: 'application_form_magnify',
+			handler	: function()
+			{
+				var grid = Ext.getCmp('idgrid_tasksuratkeluar');				
+				var storegrid = grid.getStore();
+				storegrid.each(function(record){ 
+				  //console.log(record.data);
+				});
+
+				var record 	= grid.getView().getSelectionModel().getSelection()[0]; 
+				var sk_id = record.get('rowid');
+				var reffjenissurat = record.get('reffjenissurat');
+				//console.log(sk_id);
+				if (sk_id){
+					if(!Init.winss_formsuratkeluardetail)
+					{
+						var formsuratkeluardetail = Ext.create('simpel.surat_keluar.formtasksuratkeluardetail');
+						Init.winss_formsuratkeluardetail = Ext.widget('window', {
+							closeAction	: 'hide',
+							width: 700,
+							height	: 600,
+							autoScroll	:true,
+							//id			: ''+Init.idmenu+'winmapppelsource',
+							resizable	: true,
+							modal		: true,
+							bodyPadding	: 5,
+							layout		: 'fit',
+							items		: formsuratkeluardetail
+						});
+					}
+					Init.winss_formsuratkeluardetail.show();
+					var myField 	= Ext.getCmp('formtasksuratkeluardetails'+pageId);
+					var form_data 	= myField.getForm();
+					form_data.loadRecord(record);
+					
+					Ext.getCmp('addtujuaninternal').hide();
+					Ext.getCmp('deletetujuaninternal').hide();					
+					Ext.getCmp('addtembusan').hide();
+					Ext.getCmp('deletetembusan').hide();
+					Ext.getCmp('addattdokumen').hide();
+					Ext.getCmp('deleteattdokumen').hide();
+					Ext.getCmp('addworkflowdetail').hide();
+					Ext.getCmp('deleteworkflowdetail').hide();
+					
+					if(reffjenissurat = 'MD323'){
+						Ext.getCmp('vtujuan_internal'+pageId).show();									
+						Ext.getCmp('vtujuan_external'+pageId).hide();
+						Ext.getCmp( 'vtembusan_external'+pageId).hide();
+						
+					}
+					else{
+						Ext.getCmp('vtujuan_internal'+pageId).hide();									
+						Ext.getCmp('vtujuan_external'+pageId).show();
+						Ext.getCmp( 'vtembusan_external'+pageId).show();
+					}
+					
+					Ext.getCmp('addworkflowdetail').hide();
+					Ext.getCmp('deleteworkflowdetail').hide();
+					
+					Ext.getCmp('addattdokumen').hide();
+					Ext.getCmp('deleteattdokumen').hide();
+					
+					Ext.getCmp('addtembusan').hide();
+					Ext.getCmp('deletetembusan').hide();
+					
+					Ext.getCmp('addtujuaninternal').hide();
+					Ext.getCmp('deletetujuaninternal').hide();
+					
+					
+					var storewf = Ext.getCmp('gridtujuaninternal'+pageId).getStore();
+					storewf.getProxy().extraParams = {
+						view :'tbl_tujuaninternal',
+						limit : 'All',
+						"filter[0][field]" : "reffsurat",
+						"filter[0][data][type]" : "string",
+						"filter[0][data][comparison]" : "eq",
+						"filter[0][data][value]" : sk_id			
+					};
+					storewf.reload();
+					
+					var storewf = Ext.getCmp('gridworkflowdetail'+pageId).getStore();
+					storewf.getProxy().extraParams = {
+						view :'v_workflowdetail',
+						limit : 'All',
+						"filter[0][field]" : "refftransaction",
+						"filter[0][data][type]" : "string",
+						"filter[0][data][comparison]" : "eq",
+						"filter[0][data][value]" : sk_id			
+					};
+					storewf.reload();
+					
+					var storead = Ext.getCmp('gridAttdokumen'+pageId).getStore();
+					storead.getProxy().extraParams = {
+						view :'tbl_attdokumen',
+						limit : 'All',
+						"filter[0][field]" : "reffsurat",
+						"filter[0][data][type]" : "string",
+						"filter[0][data][comparison]" : "eq",
+						"filter[0][data][value]" : sk_id,
+						"filter[1][field]" : "active",
+						"filter[1][data][type]" : "string",
+						"filter[1][data][comparison]" : "eq",
+						"filter[1][data][value]" : 'Y'
+					};
+					storead.reload();
+					
+					var storead = Ext.getCmp('gridTembusan'+pageId).getStore();
+					storead.getProxy().extraParams = {
+						view :'tbl_tembusan',
+						limit : 'All',
+						"filter[0][field]" : "reffsurat",
+						"filter[0][data][type]" : "string",
+						"filter[0][data][comparison]" : "eq",
+						"filter[0][data][value]" : sk_id
+					};
+					storead.reload();
+				}
+			}
+		}]
+		var pgrid 		= msclass.getgrid(v_table,'idgrid_tasksuratkeluar',itemdocktop);	
+		var f_items    = msclass.getitemsform(v_table,'idform_srcsuratkeluar');
+		var pformsearch = msclass.getformsearchpeng1(f_items);
+		
+	   var get_toolbar =  [];
+		
+		
+	//==================| SEARCH |======================================================
+	var parms_pgrid = Ext.getCmp('idgrid_tasksuratkeluar').getStore();
+	var fsearch =  Ext.create('Ext.form.Panel',{ 
+				xtype: 'form',
+				title: 'Form Search', 
+				flex: 1,
+				width	: 250,
+				id : 'searchlaporanstokitems',
+				region: 'west',
+				bodyStyle: 'padding:5px',
+				layout: {
+					type: 'vbox',
+					align : 'stretch',
+					pack  : 'start',
+				},
+				//tbar	:ptoolbar_search,
+				items	: [{
+					border	: false,
+					xtype: 'panel',
+					bodyStyle: 'padding:0 0 20px 0',
+					items : pformsearch,
+					buttons		: [{
+								text	: 'Search',
+								iconCls : 'magnifier',
+								handler	: function()
+									{
+										var findform = this.up('form').getForm();
+										var oksparams = findform.getValues();
+										console.log(oksparams);
+									   
+										parms_pgrid.getProxy().extraParams = {
+												view :'public.v_suratkeluar',
+												limit : "All",
+												"filter[0][field]" : "farms",
+												"filter[0][data][type]" : 'string',
+												"filter[0][data][comparison]" : "eq",
+												"filter[0][data][value]" : oksparams.farms
+										};
+										parms_pgrid.load(); 
+									}
+							},
+							{
+								text	: 'Reset',
+								iconCls : 'arrow_refresh',
+								handler	: function()
+								{
+									this.up('form').getForm().reset();
+								}
+							}
+					]
+				}
+			]
+	});
+	var layout = msclass.getlayout(pgrid,'',get_toolbar,iconCls,name,fsearch);		
+}

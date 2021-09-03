@@ -1,0 +1,63 @@
+function apps(name, iconCls) {
+    // Ext.require(['Ext.ux.grid.FiltersFeature']);					
+
+    var formapprovalamr = Ext.create('analisa.view.formapprovalamr');
+    var gridapprovalamr = Ext.create('analisa.view.gridapprovalamr');	
+	
+    var tabPanel = Ext.getCmp('contentcenter');
+	tabPanel.items.each(function(c){
+		if (c.title != 'Home') {
+			tabPanel.remove(c);
+		}
+	});
+	
+    var items = tabPanel.items.items;
+    var exist = false;
+    // for (var i = 0; i < items.length; i++) {
+        // if (items[i].id == '2') {
+            // tabPanel.setActiveTab('2');
+            // exist = true;
+        // }
+    // }
+    if (!exist) {
+        // Ext.getCmp('contentcenter')
+		tabPanel.add({
+            title: name,
+            id: '6',
+            xtype: 'panel',
+            iconCls: iconCls,
+            closable: true,
+            layout: 'border',
+            // overflowY	: 'scroll',
+            defaults: {
+                collapsible: true,
+                split: true,
+                //bodyStyle: 'padding:5px'
+            },
+            // bodyPadding: '5 5 0',
+            items: [{
+                xtype: 'panel',
+                title: 'Form Search',
+                flex: 1,
+				id  : 'searchformapproval',
+                region: 'west',
+                // layout 		: 'fit',
+                bodyStyle: 'padding:5px',
+                //width			: 600,
+                // margins		: '10',
+                items: formapprovalamr
+                //items			: []
+            }, {
+                xtype: 'tabpanel',
+                flex: 3,
+				id : 'tabappamr',
+                collapsible: false,				
+                region: 'center',
+				activeTab	: 0,				
+				fit		: true,							
+                items: [ gridapprovalamr ]
+            }]
+        });
+        tabPanel.setActiveTab('6');
+    }
+}

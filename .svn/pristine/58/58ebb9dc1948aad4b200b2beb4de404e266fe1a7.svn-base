@@ -1,0 +1,406 @@
+Ext.define('analisa.view.gridvalidamr2' ,{
+	extend: 'Ext.panel.Panel',    
+	initComponent	: function()
+	{
+		Ext.define('modelGridamrDaily',{
+			extend	: 'Ext.data.Model',
+			fields	: ['keyid','id_pel','namapel','sbu','area','fdvm','fdvc','fp','ft','fvm','fvc','tanggal','stat','selisih_cm','selisih_un','stream','selectopts','approved','reffamralertid', 'fmonth',
+			'fp', 'ft', 'fcf', 'fmc', 'fmn', 'fsg', 'pbase', 'tbase', 'pmax', 'pmin', 'fyear', 'fdatetime',
+			'qmax' , 'qmin', 'tmax', 'tmin' , 'qbase_max' , 'qbase_min' , 'reffidamrbridgedaily', 'fdate'
+			]
+		});		
+		
+		var darecord;
+		var dataselect;
+		var datajson;
+		var htmlstring;		
+		
+		var storeGridamrDaily = Ext.create('Ext.data.JsonStore',{
+			model	: 'modelGridamrDaily',
+			storeId: 'storeGridamrDailyas',
+			proxy: {
+				type: 'pgascomProxy',			
+				url: base_url+'analisa/findamrvalid',
+				reader: {
+					type: 'json',				
+					root: 'data'
+				}			
+			}
+		});	
+		storeGridamrDaily.load();
+		
+		
+		var gridDataValidate = Ext.create('Ext.grid.Panel',
+		{	
+		multiSelect	: true,
+		selType		: 'checkboxmodel',
+		selModel: {
+				injectCheckbox: 0,
+				pruneRemoved: false
+			},		
+		store		: storeGridamrDaily,
+		id			: 'gridDataValidateaaa',		
+		dockedItems: [
+		{
+			xtype: 'toolbar',
+			items: [
+				{
+					iconCls: 'accept',					
+					text: 'Approved',
+					handler	: function()
+					{
+						var items = [];
+						storeGridamrDaily.each(function(record){
+							
+							if (record.data.selectopts == true)
+							{
+								items.push(record.data);
+								//console.log(record.data);
+							}
+						});
+						
+						//console.log(items);
+						
+						Ext.Ajax.request({ 
+							url			: base_url+'analisa/updateapproval',
+							method: 'POST',
+							params:{
+								data : Ext.encode(items)
+							},
+							success: function(response,requst){
+								Ext.Msg.alert('Sukses','Data Telah di Approve');
+								//workflowGrid.load();
+								//console.log(response.text);
+								//alert('test');
+								
+								
+								var store = Ext.getCmp("gridDataValidateaaa").getStore();
+								store.removeAll();
+								store.reload();
+								//var as = this.getStore();
+								//as.load();
+							},
+							failure:function(response,requst)
+							{
+								Ext.Msg.alert('Fail !','Input Data Gagal');
+								Ext.Msg.alert('Warning!', 'Authentication server is unreachable : ' + action.response.responseText + "");
+							}
+										
+						});
+					}
+	
+				},{
+					text: 'Reject',
+					iconCls : 'cancel'
+				},{
+					text: 'Export',
+					iconCls : 'page_white_excel',
+					xtype : 'exporterbutton',
+					format: 'excel',
+                    title: 'Data Validate'
+					/* handler : function ()
+					{
+						oksparams = Ext.getCmp('formanomali').getValues();
+						 
+						storeGridAnomaliamr.getProxy().extraParams = {
+							startt : oksparams.startt,
+							endd : oksparams.endd,
+							sbu : oksparams.sbu,
+							area : oksparams.area,
+							id_pel : oksparams.id_pel,
+							namapel : oksparams.namapel									
+						};
+						storeGridAnomaliamr.reload({method: 'POST'});
+						Ext.getCmp('searchanomaliform').collapse();
+						
+						console.log(oksparams);
+						// window.open(base_url+'analisa/download/excel_anomali', '_blank');
+					} */
+				}			
+			]
+		},
+		{
+			xtype: 'pagingtoolbar',
+			dock: 'bottom',
+			store: storeGridamrDaily,
+			displayInfo: true,
+			plugins : [Ext.create('Ext.ux.PagingToolbarResizer')]
+		}],			
+		columns		: [
+			Ext.create('Ext.grid.RowNumberer',
+					{
+						header: 'No', 
+						width: 40
+					}
+			),
+			{
+				dataIndex	: 'stat',
+				locked   : true,
+				text	: 'Status',
+				width		: 45,
+				align	: 'center',
+				renderer : function(value, metaData, record, rowIdx, colIdx, store, view){					
+					var color = '';
+					if(record.get('stat') == "2")
+					{
+						color = base_url+'asset/ico/green_indicator.ico';
+					}else if(record.get('stat') == "1")
+					{
+						color = base_url+'asset/ico/yellow_indicator.ico';
+					}else
+					{
+						color = base_url+'asset/ico/red_indicator.ico';
+					}
+					return '<div><img src='+color+' width="16px" height="16px"></div>';					
+				}
+			},
+			{
+				text	: 'RD',
+				locked   : true,
+				width	: 75,
+				cls   : 'header-cell',
+				dataIndex	: 'sbu'
+			},
+			{
+				text	: 'Area',
+				locked   : true,
+				width	: 95,
+				cls   : 'header-cell',
+				dataIndex	: 'area'
+			},	
+			{
+				text	: 'No Reff',
+				locked   : true,
+				width	: 100,
+				cls   : 'header-cell',
+				dataIndex	: 'id_pel'
+			},
+			{
+				text	: 'Nama Pelanggan',
+				locked   : true,
+				width	: 100,									
+				cls   : 'header-cell',
+				dataIndex	: 'namapel'
+			},
+			{
+				text	: 'Stream',
+				locked   : true,
+				align	: 'center',
+				dataIndex	: 'stream'
+			},		
+			{
+				text	: 'Tanggal',
+				locked   : true,
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'tanggal'
+			},
+			{
+				text	: 'FP',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'fp'
+
+			},
+			{
+				text	: 'FT',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'ft'
+			},
+			{
+				text	: 'FCF',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'fcf'
+			},
+			{
+				text	: 'FMC',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'fmc'
+			},
+			{
+				text	: 'FMN',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'fmn'
+			},			
+			{
+				text	: 'FSG',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'fsg'
+			},			
+			{
+				text	: 'PBASE',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'pbase'
+			},
+			{
+				text	: 'TBASE',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'tbase'
+			},
+			{
+				text	: 'PMAX',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'pmax'
+			},
+			{
+				text	: 'PMIN',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'pmin'
+			},
+			{
+				text	: 'QMAX',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'qmax'
+			},			
+			{
+				text	: 'QMIN',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'qmin'
+			},				
+			{
+				text	: 'TMAX',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'tmax'
+			},				
+			{
+				text	: 'TMIN',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'tmin'
+			},	
+			{
+				text	: 'QBASEMAX',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'qbase_max'
+			},	
+			{
+				text	: 'QBASEMIN',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'qbase_min'
+			}				
+		],
+		listeners	: 
+		{
+			beforeitemcontextmenu: function(view, record, item, index, e)
+			{
+				e.stopEvent();
+				k_menu.showAt(e.getXY());
+			},
+
+			/* selectionchange: function (sm, records, options) {
+				var rec = records[0];
+				console.log('selectionchange fired '+ rec);
+			}, */
+			beforeselect: function(model, record, index, eOpts) {
+				if (record.data.stat == 0) {//replace this with your logic.
+					return false;
+				}
+			},
+			itemclick : function(model, record, index, eOpts)
+			{
+				darecord = record.data ;
+				// storeGridAnomaliDetail.reload({params:{
+								// id : record.data.reffamralertid
+				// }});
+				/*
+				storeGridHourlyValidate.reload({params:{
+								id_pel : record.data.id_pel,
+								tanggal : record.data.tanggal,
+								stream  : record.data.stream
+				}}
+				
+				);
+				*/
+				
+			},
+			select: function (model, record, index, eOpts) {
+				// console.log(record.data);
+				dataselect = record.data;
+				
+				// storeGridAnomaliDetail.reload({params:{
+								// id : record.data.reffamralertid
+				// }});
+				/*
+				storeGridHourlyValidate.reload({params:{
+								id_pel : record.data.id_pel,
+								tanggal : record.data.tanggal,
+								stream  : record.data.stream
+				}}
+				);
+				*/
+				
+				record.set('approved',1);
+				record.set('selectopts',true);
+			},
+			deselect: function (view, record, item, index, e, eOpts) {
+				//console.log('deselect fired'+index);
+				//record.data.selectopts = false;
+				record.set('selectopts',false);
+			}
+			 
+		}		
+		}); 		
+		
+		
+		
+		// storeGridDaily.load();
+		Ext.apply(this,{
+			title  		: 'AMR Data Validate',			
+			frame: true,	
+			iconCls 	: 'application_view_gallery',
+			layout: 'border',
+			defaults: {
+                collapsible: true,
+                split: true,
+                //bodyStyle: 'padding:5px'
+            },
+			items: [
+				{
+					xtype : 'panel',
+					title : 'Data Validate',
+					frame	: true,
+					region : 'center',
+					layout: 'fit',
+					collapsible: false,
+					flex: 3,					
+					// autoScroll : true,
+					border: false,
+					items: gridDataValidate
+					
+				}
+			]
+		});
+		this.callParent(arguments);
+	}
+});

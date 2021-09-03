@@ -1,0 +1,756 @@
+Ext.define('analisa.view.gridanomaliamr' ,{
+	extend: 'Ext.panel.Panel',    
+	initComponent	: function()
+	{
+		Ext.define('modelGridAnomaliamr',{
+			extend	: 'Ext.data.Model',
+			fields	: ['keyid','id_pel','namapel','sbu','area','fdvm','fdvc','fp','ft','fvm','fvc','tanggal','stat','selisih_cm','selisih_un','stream','selectopts','approved','reffamralertid', 'fmonth',
+			'fp', 'ft', 'fcf', 'fmc', 'fmn', 'fsg', 'pbase', 'tbase', 'pmax', 'pmin', 'fyear', 'fdatetime',
+			'qmax' , 'qmin', 'tmax', 'tmin' , 'qbase_max' , 'qbase_min' , 'reffidamrbridgedaily', 'fdate'
+			]
+		});		
+		
+		var storeGridAnomaliamr = Ext.create('Ext.data.JsonStore',{
+			model	: 'modelGridAnomaliamr',
+			storeId: 'amrAnomaliStore',
+			proxy: {
+				type: 'pgascomProxy',			
+				url: base_url+'analisa/findamranomali',
+				reader: {
+					type: 'json',				
+					root: 'data'
+				}			
+			}
+		});	
+		
+		Ext.define('modelGridHourlyDetail',{
+			extend	: 'Ext.data.Model',
+			fields	: ['id_pel','namapel','sbu','area','tanggal','stream','selectopts','approved',
+			 'stat',
+			'h00','h01','h02','h03','h04','h05','h06','h07','h08',
+			'h09','h10','h11','h12','h13','h14','h15','h16','h17',
+			'h18','h19','h20','h21','h22','h23','total','total_hourly','daily']
+		});		
+
+		var storeGridHourlyAnomali = Ext.create('Ext.data.JsonStore',{
+			model	: 'modelGridHourlyDetail',
+			storeId: 'amrkelStoredetail',
+			proxy: {
+				type: 'pgascomProxy',			
+				url: base_url+'analisa/showhourlyanomali',
+				reader: {
+					type: 'json',				
+					root: 'data'
+				}			
+			}
+		});			
+		
+		var darecord;
+		var dataselect;
+		var datajson;
+		var htmlstring;
+		
+		Ext.define('modelGridAnomaliDetail',{
+			extend	: 'Ext.data.Model',
+			fields	: ['id_pel','tanggal','alertdescription','alertname','alertalgoritma','status']
+		});	
+
+		var storeGridAnomaliDetail = Ext.create('Ext.data.JsonStore',{
+			model	: 'modelGridAnomaliDetail',
+			storeId: 'detailAnomaliStore',
+			proxy: {
+				type: 'pgascomProxy',
+				pageParam: false, 
+				startParam: false, 
+				limitParam: false,			
+				url: base_url+'analisa/showalertdailydetail',
+				reader: {
+					type: 'json',				
+					root: 'data'
+				}			
+			}
+		});
+		
+		var k_menu = new Ext.menu.Menu({
+			items: [{
+				text	: 'Show Detail',
+				iconCls : 'table_add',
+					handler: function() {
+						// console.log(datarecord.id);
+						}
+				},{
+					  text: 'Show Graph',
+					  iconCls : 'table_delete',
+					  handler: function() {
+						  // alert(datarecord.id);					  
+					  }
+				  }]
+			  });
+		
+		
+		var gridDetailAnomali = Ext.create('Ext.grid.Panel',{
+		store	: storeGridAnomaliDetail,
+		id		: 'griddetailAnomali',			
+		columns		: [
+				{	
+					dataIndex : 'alertname',
+					text : 'Alert',
+					flex: 1,
+					renderer:function(value, metaData, record, row, col, store, gridView)
+					{
+						metaData.tdAttr= 'data-qtip="'+value+'"';
+						return value;
+					}
+				},
+				{	
+					dataIndex : 'alertdescription',
+					text : 'Description',
+					flex: 3,
+					renderer:function(value, metaData, record, row, col, store, gridView)
+					{
+						metaData.tdAttr= 'data-qtip="'+value+'"';
+						return value;
+					}					
+				},	
+				{	
+					dataIndex : 'alertalgoritma',
+					text : 'Algoritma',
+					flex: 2,
+					renderer:function(value, metaData, record, row, col, store, gridView)
+					{
+						metaData.tdAttr= 'data-qtip="'+value+'"';
+						return value;
+					}
+				}
+		]			
+		});
+		
+		var gridDetailHourlyAnomali = Ext.create('Ext.grid.Panel',{
+		store	: storeGridHourlyAnomali,
+		id		: 'gridHourlyAnomali',		
+		columns		: [			
+			{
+				text	: 'No Reff',
+				locked   : true,
+				width		: 100,
+				cls   : 'header-cell',				
+				dataIndex	: 'id_pel',
+				autoSizeColumn : true
+			},
+			{
+				text	: 'Nama Pelanggan',
+				locked   : true,
+				width		: 100,
+				cls   : 'header-cell',				
+				dataIndex	: 'namapel',
+				autoSizeColumn : true								
+			},			
+			{
+				text	: 'Stream',
+				width		: 100,
+				cls   : 'header-cell',
+				locked   : true,
+				autoSizeColumn : true,
+				dataIndex	: 'stream'
+			},
+			{
+				text	: 'Volume',
+				align	: 'center',
+				columns  : [
+				{
+					text : '1',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h01'
+				},
+				{
+					text : '2',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h02'
+				},
+				{
+					text : '3',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h03'
+				},
+				{
+					text : '4',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h04'
+				},
+				{
+					text : '5',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h05'
+				},
+				{
+					text : '6',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h06'
+				},
+				{
+					text : '7',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h07'
+				},
+				{
+					text : '8',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h08'
+				},
+
+				{
+					text : '9',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h09'
+				},
+				{
+					text : '10',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h10'
+				},
+				{
+					text : '11',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h11'
+				},
+				{
+					text : '12',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h12'
+				},
+				{
+					text : '13',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h13'
+				},
+				{
+					text : '14',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h14'
+				},
+				{
+					text : '15',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h15'
+				},
+				{
+					text : '16',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h16'
+				},
+
+				{
+					text : '17',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h17'
+				},
+				{
+					text : '18',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h18'
+				},
+				{
+					text : '19',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h19'
+				},
+				{
+					text : '20',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h20'
+				},
+				{
+					text : '21',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h21'
+				},
+				{
+					text : '22',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h22'
+				},
+				{
+					text : '23',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h23'
+				},
+				{
+					text : '24',
+					width		: 40,
+					cls   : 'header-cell',
+					align	: 'right',
+					dataIndex	: 'h00'
+				}				
+				]				
+			},
+			{
+				text	: 'Total',
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'total_hourly',
+				autoSizeColumn : true
+			},			
+			{
+				text	: 'Daily',
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'daily',
+				autoSizeColumn : true
+			}			
+		]
+		// ,
+		// viewConfig: {
+        // listeners: {
+            // refresh: function(dataview) {
+                // Ext.each(dataview.panel.columns, function(column) {
+                    // if (column.autoSizeColumn === true)
+                        // column.autoSize();
+					// })
+				// }
+			// }
+		// }
+		
+		});
+		
+
+		var gridDataAnomali = Ext.create('Ext.grid.Panel',
+		{	
+		multiSelect	: true,
+		selType		: 'checkboxmodel',
+		selModel: {
+				injectCheckbox: 0,
+				pruneRemoved: false
+			},		
+		store		: storeGridAnomaliamr,
+		id			: 'gridAnomaliamr',		
+		dockedItems: [
+		{
+			xtype: 'toolbar',
+			items: [
+				{
+					iconCls: 'accept',					
+					text: 'Approved',
+					handler	: function()
+					{
+						var items = [];
+						storeGridAnomaliamr.each(function(record){
+							
+							if (record.data.selectopts == true)
+							{
+								items.push(record.data);
+								//console.log(record.data);
+							}
+						});
+						
+						//console.log(items);
+						
+						Ext.Ajax.request({ 
+							url			: base_url+'analisa/updateapproval',
+							method: 'POST',
+							params:{
+								data : Ext.encode(items)
+							},
+							success: function(response,requst){
+								Ext.Msg.alert('Sukses','Data Telah di Approve');
+								storeGridAnomaliamr.removeAll();	
+								storeGridAnomaliamr.reload();
+							},
+							failure:function(response,requst)
+							{
+								Ext.Msg.alert('Fail !','Input Data Gagal');
+								Ext.Msg.alert('Warning!', 'Authentication server is unreachable : ' + action.response.responseText + "");
+							}
+										
+						});
+					}
+	
+				},{
+					text: 'Reject',
+					iconCls : 'cancel'
+				},{
+					text: 'Export',
+					iconCls : 'page_white_excel',
+					xtype : 'exporterbutton',
+					format: 'excel',
+                    title: 'Data Anomali'
+				}			
+			]
+		},
+		{
+			xtype: 'pagingtoolbar',
+			dock: 'bottom',
+			store: storeGridAnomaliamr,
+			displayInfo: true,
+			plugins : [Ext.create('Ext.ux.PagingToolbarResizer')]
+		}],			
+		columns		: [
+			{
+				autoSizeColumn : true,
+				dataIndex	: 'stat',
+				locked   : true,
+				text	: 'Status',
+				width		: 45,
+				align	: 'center',
+				renderer : function(value, metaData, record, rowIdx, colIdx, store, view){					
+					var color = '';
+					if(record.get('stat') == "2")
+					{
+						color = base_url+'asset/ico/green_indicator.ico';
+					}else if(record.get('stat') == "1")
+					{
+						color = base_url+'asset/ico/yellow_indicator.ico';
+					}else
+					{
+						color = base_url+'asset/ico/red_indicator.ico';
+					}
+					return '<div><img src='+color+' width="16px" height="16px"></div>';					
+				}
+			},
+			{
+				autoSizeColumn : true,
+				text	: 'RD',
+				locked   : true,
+				width	: 75,
+				cls   : 'header-cell',
+				dataIndex	: 'sbu'
+			},
+			{
+				autoSizeColumn : true,
+				text	: 'Area',
+				locked   : true,
+				width	: 95,
+				cls   : 'header-cell',
+				dataIndex	: 'area'
+			},	
+			{
+				autoSizeColumn : true,
+				text	: 'No Reff',
+				locked   : true,
+				width	: 100,
+				cls   : 'header-cell',
+				dataIndex	: 'id_pel'
+			},
+			{
+				autoSizeColumn : true,
+				text	: 'Nama Pelanggan',
+				locked   : true,
+				width	: 100,									
+				cls   : 'header-cell',
+				dataIndex	: 'namapel'
+			},
+			{
+				autoSizeColumn : true,
+				text	: 'Stream',
+				locked   : true,
+				align	: 'center',
+				dataIndex	: 'stream'
+			},		
+			{
+				autoSizeColumn : true,
+				text	: 'Tanggal',
+				locked   : true,
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'tanggal'
+			},
+			{
+				autoSizeColumn : true,
+				text	: 'Pressure',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'fp'
+
+			},
+			{
+				autoSizeColumn : true,
+				text	: 'Temperatur',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'ft'
+			},
+			{
+				autoSizeColumn : true,
+				text	: 'FCF',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'fcf'
+			},
+			{
+				autoSizeColumn : true,
+				text	: 'Komposisi Karbon',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'fmc'
+			},
+			{
+				autoSizeColumn : true,
+				text	: 'Komposisi Nitrogen',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'fmn'
+			},			
+			{
+				autoSizeColumn : true,
+				text	: 'FSG',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'fsg'
+			},			
+			{
+				autoSizeColumn : true,
+				text	: 'Pressure Base',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'pbase'
+			},
+			{
+				autoSizeColumn : true,
+				text	: 'Temperatur Base',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'tbase'
+			},
+			{
+				autoSizeColumn : true,
+				text	: 'Pressure Max',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'pmax'
+			},
+			{
+				autoSizeColumn : true,
+				text	: 'Pressure Min',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'pmin'
+			},
+			{
+				autoSizeColumn : true,
+				text	: 'QMAX',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'qmax'
+			},			
+			{
+				autoSizeColumn : true,
+				text	: 'QMIN',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'qmin'
+			},				
+			{
+				autoSizeColumn : true,
+				text	: 'Temperatur Max',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'tmax'
+			},				
+			{
+				autoSizeColumn : true,
+				text	: 'Temperatur Min',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'tmin'
+			},	
+			{
+				autoSizeColumn : true,
+				text	: 'Volume Base Corrected Max',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'qbase_max'
+			},	
+			{
+				autoSizeColumn : true,
+				text	: 'Volume Base Corrected Min',				
+				width		: 100,
+				cls   : 'header-cell',
+				align	: 'right',
+				dataIndex	: 'qbase_min'
+			}				
+		]
+		,
+		
+
+		listeners	: 
+		{
+			beforeitemcontextmenu: function(view, record, item, index, e)
+			{
+				e.stopEvent();
+				k_menu.showAt(e.getXY());
+			},
+
+			/* selectionchange: function (sm, records, options) {
+				var rec = records[0];
+				console.log('selectionchange fired '+ rec);
+			}, */
+			 beforeselect: function(model, record, index, eOpts) {
+				if (record.data.stat == 0) {//replace this with your logic.
+					return false;
+				}
+			},
+			itemclick : function(model, record, index, eOpts)
+			{
+				
+				darecord = record.data ;
+				storeGridAnomaliDetail.removeAll();
+				storeGridAnomaliDetail.reload({params:{
+					id : record.data.reffamralertid
+				}});
+				
+				storeGridHourlyAnomali.removeAll();
+				storeGridHourlyAnomali.reload({params:{
+								id_pel : record.data.id_pel,
+								tanggal : record.data.tanggal,
+								stream  : record.data.stream
+				}}
+				);
+				
+			},
+			select: function (model, record, index, eOpts) {
+				// console.log(record.data);
+				dataselect = record.data;
+				storeGridAnomaliDetail.removeAll();
+				storeGridAnomaliDetail.reload({params:{
+								id : record.data.reffamralertid
+				}});
+				storeGridHourlyAnomali.removeAll();
+				storeGridHourlyAnomali.reload({params:{
+								id_pel : record.data.id_pel,
+								tanggal : record.data.tanggal,
+								stream  : record.data.stream
+				}}
+				);
+				record.set('approved',1);
+				record.set('selectopts',true);
+			},
+			deselect: function (view, record, item, index, e, eOpts) {
+				//console.log('deselect fired'+index);
+				//record.data.selectopts = false;
+				record.set('selectopts',false);
+			}
+			 
+		}		
+		}); 
+		
+		
+		// console.log(datajson);
+		
+		Ext.apply(this,{
+			title  : 'AMR Data Anomali ',
+			frame: true,	
+			iconCls 	: 'application_view_gallery',
+			layout: 'border',
+			defaults: {
+                collapsible: true,
+                split: true,
+                //bodyStyle: 'padding:5px'
+            },
+
+			items: [
+				{
+					xtype : 'panel',
+					title : 'Data Anomali',
+					frame	: true,
+					region : 'center',
+					layout: 'fit',
+					collapsible: false,
+					flex: 3,					
+					// autoScroll : true,
+					border: false,
+					items: gridDataAnomali
+					
+				},
+				{
+					xtype : 'panel',					
+					autoScroll : true,
+					region : 'east',
+					frame	: true,
+					border	: false,					
+					title : 'Status Anomali',					
+					layout: 'fit',					
+					flex: 1,
+					items : gridDetailAnomali
+				},
+				
+				{
+					xtype : 'panel',					
+					autoScroll : true,
+					region : 'south',
+					frame	: true,
+					border	: false,					
+					title : 'Detail Data Hourly',					
+					layout: 'fit',					
+					flex: 1,
+					items : gridDetailHourlyAnomali
+				}
+			]
+			
+			
+		});
+		this.callParent(arguments);
+	}
+});

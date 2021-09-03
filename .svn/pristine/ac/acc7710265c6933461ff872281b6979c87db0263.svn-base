@@ -1,0 +1,91 @@
+Ext.define('analisa.view.charthourlybulk', {
+ extend: 'Ext.panel.Panel',
+    // xtype: 'basic-line',
+
+    initComponent: function() {
+		
+
+		Ext.apply(this,{	
+			layout: 'border',
+			defaults: {
+                collapsible: true,
+                split: true,
+				border : false
+            },
+			id: 'titleprofilinghourlybulk',
+			frame: true,	
+			items: [ 
+				{	
+					xtype 			: 'panel',
+					title 			: 'Volume',
+					//autoScroll : true,
+					frame			: true,
+					region 			: 'north',
+					layout			: 'fit',
+					// tools:[{ // these will be right justified. (and the collapse tool will always go in this set)
+						// type:'next',
+						  // handler:function(){
+							// console.log('next pressed');
+						  // } 
+					// }],
+					//collapsible: false,
+					flex			: 2,					
+					//autoScroll : true,					
+					id				: 'bulkcharthourly'
+					//items			: amrcharthourly 
+				},
+				{
+					collapsible: false,
+					xtype	: 'panel',
+					region	: 'center',
+					layout: 'border',					
+					flex: 1,
+					defaults: {
+						collapsible: true,
+						split: true
+						// , border : false
+					},
+					frame: false,
+					// title	: 'Pressure',
+					// id		: 'bulkcharthourlyfpin',
+					items : [
+						{
+							xtype	: 'panel',
+							region	: 'west',
+							layout: 'fit',					
+							flex: 1,
+							title	: 'Pressure Inlet',
+							id		: 'bulkcharthourlyfpin',
+							//items : amrcharthourlyft
+						},
+						{
+							xtype	: 'panel',
+							region	: 'center',
+							layout: 'fit',					
+							flex: 1,
+							title	: 'Pressure Outlet',
+							id		: 'bulkcharthourlyfpout',
+							//items : amrcharthourlyft
+							
+						},
+						{
+							xtype	: 'panel',
+							region	: 'east',
+							layout: 'fit',					
+							flex: 1,
+							title	: 'Temperature',
+							id		: 'bulkcharthourlyft',
+							//items : amrcharthourlyft
+							
+						}
+					]
+					
+				}
+				
+			]
+		});
+		
+        this.callParent();
+    }
+	
+});

@@ -1,0 +1,519 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Taksasi extends MY_Controller {
+
+	function __construct() {		
+        parent::__construct();        
+    }
+	
+	public function index ()
+	{
+		vd::dump($this->session->userdata('username'));
+	}
+	
+	public function updatetaksasi()
+	{
+		$this->load->model('b_model');	
+		$datass 		= $this->input->post('data', TRUE);
+		$rowid 			= $this->input->post('rowid');
+		$refftaxation = $this->input->post('refftaxation');
+		$volcorrected 			= $this->input->post('volcorrected',true);
+		$datapost 	= json_decode($datass);
+		$setun1 	= array();		
+		
+		foreach ($datapost as $items)
+		{
+			$upfilt  = array('rowid' => $items->reffamralertid);
+			$dataapp = array(
+				'isapproval' => 1,
+				'updperson' => $this->session->userdata('username'),				
+				'upddate' => dateTonum(date('Y-m-d H:i:s'))
+			);
+
+			$a_datanya = array(				
+				'reffidamrbridgedaily'  =>$items->reffidamrbridgedaily,
+				'reffamralertid'  =>$items->reffamralertid,
+				'sbu'  =>$items->sbu,
+				'area'  =>$items->areacode,
+				'streamid'  =>$items->stream,
+				'idpel'  =>$items->id_pel,
+				'pelname'  =>$items->namapel,
+				'fdatetime'  =>$items->fdatetime,
+				'fdate'  =>$items->fdate,
+				'fmonth'  =>$items->fmonth,
+				'fyear'  =>$items->fyear,
+				'fdvm'  =>$items->fdvm,
+				
+				// 'fdvc'  =>$items->fdvc,
+				
+				'fdvc'  =>$volcorrected,
+				'fvm'  =>$items->fvm,
+				'fvc'  =>$items->fvc,
+				'fp'  =>$items->fp,
+				'ft'  =>$items->ft,
+				'status' => 1,
+				'typeapproved' => $items->stat,
+				'delflag' => 1,									
+				'creperson' => $this->session->userdata('username'),				
+				'credate' => dateTonum(date('Y-m-d H:i:s')),				
+				// 'updcnt' => 1,
+				'isapproval' => 1,
+				'reffidtaxation' => $refftaxation
+			);
+			
+			$appr = $this->b_model->insert_data('penyaluran_amr_daily', $a_datanya);			
+			$a_datanya['penyaluran_amr_dailypenyaluranid'] = "pad".$appr ;
+			$this->b_model->insert_data('h_penyaluran_amr_daily', $a_datanya);
+			$this->b_model->update_all('amr_alert_daily', $upfilt , $dataapp);
+			array_push($setun1, $a_datanya);
+		}
+		
+		$where = array('rowid' => $rowid);
+		$c_datanya = array(				
+					'delflag' => 1,									
+					'updperson' => $this->session->userdata('username'),				
+					// 'upddate' => dateTonum(date('Y-m-d H:i:s')),				
+					'isapproval' => 1
+					//, 'updcnt' => 1
+		);
+		
+		$setun2 = $this->b_model->update_all('taxation', $where, $c_datanya);
+		// $this->db->last_query();
+		$json['success'] = true;
+		$json['data1'] = $setun1;	
+		$json['data2'] = $setun2;	
+	    echo json_encode($json);
+	
+	}
+	
+	public function findamrtaksasi ()
+	{
+		
+	    $this->load->model('b_model');
+		
+		// default:  lepasin saya
+		// $kemarin = whereTofilter('createdate', date("Y-m-d", time() - 86400) , 'date' , 'lt');
+		// $kemarinlusa = whereTofilter('createdate', date("Y-m-d", time() - 172800) , 'date' , 'gt');
+		/*
+		$filter = $this->input->get('filter', TRUE) > ''? $this->input->get('filter', TRUE) : array();		
+		
+		$startt = $this->input->get('startt',true) > '' ? whereTofilter('createdate', $this->input->get('startt',true) , 'date' , 'gt') : $kemarinlusa ;
+		$endd = $this->input->get('endd',true) > '' ? whereTofilter('createdate', $this->input->get('endd',true) , 'date' , 'lt') : $kemarin ;		
+		$sbu = $this->input->get('sbu',true) > '' ? whereTofilter('sbuname', $this->input->get('sbu',true) , 'string' , 'eq') : '' ;
+		$area = $this->input->get('area',true) > '' ? whereTofilter('areaname', $this->input->get('area',true) , 'string' , 'eq') : '' ;
+		$id_pel = $this->input->get('id_pel',true) > '' ? whereTofilter('customercode', $this->input->get('id_pel',true) , 'string' , 'eq') : '' ;
+		$namapel = $this->input->get('namapel',true) > '' ? whereTofilter('customername', $this->input->get('namapel',true) , 'string' , '') : '' ;		
+		
+		if($this->input->get('status') != ''){
+			if($this->input->get('status') == 0){	
+				$status = whereTofilter('isapproval', 'null' , 'boolean' , 'null');
+			}
+			else{
+				$status = whereTofilter('isapproval', $this->input->get('status',true) , 'numeric' , 'eq');	
+			}
+		}
+		else{
+			$status = '';
+		} 
+		*/
+		
+		$bulankemarin = whereTofilter('createdate', date( "Y-m-d", strtotime( "-1 month" )) , 'date' , 'lt');
+		$bulankemarinlusa = whereTofilter('createdate', date( "Y-m-d", strtotime( "-2 month" )) , 'date' , 'gt');
+		$canrd = whereTofilter('sbuname', $this->session->userdata('rd') , 'list' , '');	
+		$canarea = whereTofilter('areaname', $this->session->userdata('area') , 'list' , '');		
+		
+		$filter = $this->input->get('filter', TRUE) > ''? $this->input->get('filter', TRUE) : array();
+			
+		$startt = $this->input->get('startt',true) > '' ? whereTofilter('createdate', $this->input->get('startt',true) , 'date' , 'gt') : $bulankemarinlusa ;
+		$endd = $this->input->get('endd',true) > '' ? whereTofilter('createdate', $this->input->get('endd',true) , 'date' , 'lt') : $bulankemarin ;		
+		$sbu = $this->input->get('sbu',true) > '' ? whereTofilter('sbuname', $this->input->get('sbu',true) , 'string' , 'eq') : $canrd ;
+		$area = $this->input->get('area',true) > '' ? whereTofilter('areaname', $this->input->get('area',true) , 'string' , 'eq') : $canarea ;
+		$id_pel = $this->input->get('id_pel',true) > '' ? whereTofilter('customercode', $this->input->get('id_pel',true) , 'string' , 'eq') : '' ;
+		$namapel = $this->input->get('namapel',true) > '' ? whereTofilter('customername', $this->input->get('namapel',true) , 'string' , '') : '' ;	
+		$status = $this->input->get('status',TRUE);
+		
+		if ($status == 0 ) {
+			$statusnya = whereTofilter('isapproval', 'null' , 'boolean' , 'null');
+		} else if ($status == 1 || $status == 4 ) {
+			$statusnya = whereTofilter('isapproval', $status , 'numeric' , 'eq');
+		} else {
+			$statusnya = "";
+		}		
+		
+		$filterojan = whereTofilter('jenisba', 9,  'numeric' , 'eq') ;
+		//$isapproval = whereTofilter('isapproval', 'null',  'boolean' , 'eq');
+		
+		array_push($filter, $startt,  $endd, $sbu, $area, $filterojan , $id_pel, $statusnya, $namapel);
+		//var_dump($filter); 		
+		
+		$limit = $this->input->get('limit', TRUE) > '' ? $this->input->get('limit', TRUE) : 25;
+	    $offset = $this->input->get('start', TRUE);
+	    
+	    $sorts = json_decode($this->input->get('sort', TRUE));
+	    if ($sorts) {
+		    foreach ($sorts as $sort) {
+		        $orders[] = $sort->property.' '.$sort->direction;
+		    }
+		    $order_by = implode(', ', $orders);
+	    } 
+		else {
+	    	$order_by = 'badate desc';
+	    }		
+
+	    $total_entries 	= $this->b_model->count_all_data('v_taxation', $filter);
+		$entries 		= $this->b_model->get_all_data('v_taxation', $filter , $limit, $offset, $order_by);		
+		
+	    $data['success'] = true;
+	    $data['total'] = $total_entries;
+	    $data['data'] = $entries;    
+		
+	    // vd::dump($data); 
+	    extjs_output($data);
+	}
+		
+	public function findamrdetailtaksasi ()
+	{
+		
+	    $this->load->model('b_model');
+		
+		// default:  lepasin saya
+		//$kemarin = whereTofilter('createdate', date("Y-m-d", time() - 86400) , 'date' , 'lt');
+		//$kemarinlusa = whereTofilter('createdate', date("Y-m-d", time() - 172800) , 'date' , 'gt');
+		
+		$filter = $this->input->get('filter', TRUE) > ''? $this->input->get('filter', TRUE) : array();	
+		
+		$startt = $this->input->get('startt',true) > '' ? whereTofilter('createdate', $this->input->get('startt',true) , 'date' , 'gt') : '' ;
+		$endd = $this->input->get('endd',true) > '' ? whereTofilter('createdate', $this->input->get('endd',true) , 'date' , 'lt') : '' ;		
+		$sbu = $this->input->get('sbu',true) > '' ? whereTofilter('sbuname', $this->input->get('sbu',true) , 'numeric' , 'eq') : '' ;
+		$area = $this->input->get('area',true) > '' ? whereTofilter('areaname', $this->input->get('area',true) , 'numeric' , 'eq') : '' ;
+		$id_pel = $this->input->get('id_pel',true) > '' ? whereTofilter('customercode', $this->input->get('id_pel',true) , 'numeric' , 'eq') : '' ;
+		$namapel = $this->input->get('namapel',true) > '' ? whereTofilter('customername', $this->input->get('namapel',true) , 'string' , '') : '' ;
+		
+		$codetax = $this->input->get('codetax',true) > '' ? whereTofilter('codetaxation', $this->input->get('codetax',true) , 'string' , 'eq') : '' ;		
+		$filterojan = whereTofilter('jenisba', 9,  'numeric' , 'noteq');		
+		$isapproval = whereTofilter('isapproval', 0,  'numeric' , 'eq');		
+		
+		array_push($filter, $startt,  $endd, $sbu, $area, $codetax , $filterojan , $id_pel, $namapel, $isapproval);
+		//var_dump($filter); 		
+		
+		$limit = $this->input->get('limit', TRUE) > '' ? $this->input->get('limit', TRUE) : 25;
+	    $offset = $this->input->get('start', TRUE);
+	    
+	    $sorts = json_decode($this->input->get('sort', TRUE));
+	    if ($sorts) {
+		    foreach ($sorts as $sort) {
+		        $orders[] = $sort->property.' '.$sort->direction;
+		    }
+		    $order_by = implode(', ', $orders);
+	    } else {
+	    	$order_by = 'viewid asc';
+	    }
+		
+
+	    $total_entries 	= $this->b_model->count_all_data('v_taxation', $filter);
+		$entries 			= $this->b_model->get_all_data('v_taxation', $filter , $limit, $offset, $order_by);		
+		
+	    $data['success'] = true;
+	    $data['total'] = $total_entries;
+	    $data['data'] = $entries;    
+		
+	    // vd::dump($data); 
+	    extjs_output($data);
+	}
+	
+	public function findamralltaksasi ()
+	{
+		
+	    $this->load->model('b_model');
+		
+		$filter = $this->input->get('filter', TRUE) > ''? $this->input->get('filter', TRUE) : array();		
+		
+		$startt = $this->input->get('startt',true) > '' ? whereTofilter('createdate', $this->input->get('startt',true) , 'date' , 'gt') : '' ;
+		$endd = $this->input->get('endd',true) > '' ? whereTofilter('createdate', $this->input->get('endd',true) , 'date' , 'lt') : '' ;		
+		$id_pel = $this->input->get('id_pel',true) > '' ? whereTofilter('customercode', $this->input->get('id_pel',true) , 'numeric' , 'eq') : '' ;
+		$namapel = $this->input->get('namapel',true) > '' ? whereTofilter('customername', $this->input->get('namapel',true) , 'string' , '') : '' ;
+		$codetax 	= $this->input->get('codetax',true) > '' ? whereTofilter('codetaxation', $this->input->get('codetax',true) , 'string' , '') : '' ;		
+		
+		array_push($filter, $startt,  $endd, $codetax, $id_pel, $namapel);
+		//var_dump($filter); 		
+		
+		$limit = $this->input->get('limit', TRUE) > '' ? $this->input->get('limit', TRUE) : 25;
+	    $offset = $this->input->get('start', TRUE);
+	    
+	    $sorts = json_decode($this->input->get('sort', TRUE));
+	    if ($sorts) {
+		    foreach ($sorts as $sort) {
+		        $orders[] = $sort->property.' '.$sort->direction;
+		    }
+		    $order_by = implode(', ', $orders);
+	    } else {
+	    	$order_by = 'badate desc';
+	    }		
+
+	    $total_entries 	= $this->b_model->count_all_data('v_taxation', $filter);
+		$entries 			= $this->b_model->get_all_data('v_taxation', $filter , $limit, $offset, $order_by);		
+		
+	    $data['success'] = true;
+	    $data['total'] = $total_entries;
+	    $data['data'] = $entries;    
+		
+	    // vd::dump($data); 
+	    extjs_output($data);
+	}
+	
+	public function updaterejecttaxsasi()
+	{		
+		$this->load->model('b_model');	
+		$datass = $this->input->post('datagrid',TRUE);
+		$user_email = $this->session->userdata('user_email');
+		$group_email = $this->session->userdata('group_email');
+		$group_exp	  = explode(';',$group_email);		
+		$to			  = array($user_email);		
+		foreach($group_exp as $emp)
+		{
+			array_push($to,$emp);
+		}
+
+		$filter[0]['field'] = "isinfo";
+		$filter[0]['data'] = array("comparison"	=> "eq",
+								   "type"		=> "string",
+								   "value"		=> 5);
+								   
+		$datatemplate = $this->b_model->get_all_data('general_info', $filter , 2 , 0 , '');
+		
+		$email_temp   = $datatemplate[0]->email;
+		$email_exp	  = explode(';',$email_temp);
+
+		foreach($email_exp as $emp)
+		{
+			array_push($to,$emp);
+		}
+
+		$subject 	= $datatemplate[0]->subject;
+		$pesan 		= $datatemplate[0]->template;		
+		
+		$datapost = json_decode($datass);
+		$setun = array();
+		
+		$n=0;		
+		$path = substr(BASEPATH,0,-7).'asset/xls/';
+		$topath = substr(BASEPATH,0,-7).'asset/tmp/';	
+		$objReader = PHPExcel_IOFactory::createReader('Excel5');
+		$objPHPExcel = $objReader->load($path.'reject_data_taksasi.xls');
+		$baseRow = 3;		
+		$objPHPExcel->getActiveSheet()->setCellValue('A1', 'Reject Data ' );	
+		
+		foreach ($datapost as $items)
+		{
+			$row = $baseRow + $n;
+			// $upfilt = whereTofilter('rowid', $items->reffamralertid, 'string' , 'eq');
+			// $delfilt = whereTofilter('keyid', $items->keyid, 'string' , 'eq');
+			$upfilt = array('reffamralertdaily' => $items->reffamralertid);
+			$delfilt = array('rowid' => $items->reffidamrbridgedaily);			
+			$dataapp = array('isapproval' => 0);
+			$datanya = array(
+				'penyaluran_amr_dailypenyaluranid' => '99',
+				'reffidamrbridgedaily' 	=> $items->reffidamrbridgedaily,
+				'reffamralertid' 		=> $items->reffamralertid,
+				'sbu' 		=> $items->sbu,
+				'area'		=> $items->areacode,
+				'streamid' 	=> $items->stream,
+				'idpel' => $items->id_pel,
+				'pelname' => $items->namapel,
+				'fdatetime' => $items->fdatetime,			
+				'fdate' => $items->fdate,
+				'fmonth' => $items->fmonth,
+				'fyear' => $items->fyear,				
+				'fdvm' =>$items->fdvm,
+				'fdvc' =>$items->fdvc,
+				'fvm' =>$items->fvm,
+				'fvc' =>$items->fvc,				
+				'fp' =>$items->fp,
+				'ft' =>$items->ft,				
+				'status' => 4,
+				'delflag' => 1,
+				'creperson' => $this->session->userdata('username'),				
+				'credate' => dateTonum(date('Y-m-d H:i:s')),				
+				'updcnt' => 1,
+				'isapproval' => 0,
+				'typeapproved' => $items->stat
+			);
+			
+			$where_tax = array('rowid' => $items->rowid);
+			$data_tax    = array(											
+							'delflag' => 1,									
+							'updperson' => $this->session->userdata('username'),				
+							// 'credate' => dateTonum(date('Y-m-d H:i:s')),				
+							'isapproval' => 4
+							//, 'updcnt' => 1
+			);
+				
+			$this->b_model->update_all('taxation', $where_tax, $data_tax);
+			
+			$datareject = $this->b_model->insert_data('h_penyaluran_amr_daily', $datanya);
+			$sial = 'padh'.$datareject;
+			// vd::dump($sial);
+			$fieldsval = "";
+			foreach ($items->field as $r)
+			{
+				$fieldsval .=$r.",";
+			}
+			$fieldsval = substr($fieldsval,0,-1);
+			$datainfo = array (
+				'reffidpengukuran' => $sial,
+				'category' => $items->kategori,
+				'fields' => $fieldsval,
+				'keterangan' => $items->keterangan,
+				'creperson' => $this->session->userdata('username'),				
+				'credate' => dateTonum(date('Y-m-d H:i:s'))			
+			);
+			
+			//select taxation
+			$filter = array();		
+			$codetax 	= whereTofilter('codetaxation', $items->codetaxation , 'string' , 'eq') ;	
+			$codewhere_tax = array('codetaxation' => $items->codetaxation);
+			array_push($filter, $codetax);
+			$limit = $this->input->get('limit', TRUE) > '' ? $this->input->get('limit', TRUE) : 25;
+			$offset = $this->input->get('start', TRUE);
+			$entries = $this->b_model->get_all_data('v_taxation', $filter , $limit, $offset, '');	
+			foreach ($entries as $itemsx){
+				$row = $baseRow + $n;
+	
+				$objPHPExcel->getActiveSheet()->setCellValue('A'.$row, $n+1)
+								  ->setCellValue('B'.$row, $itemsx->stat)
+								  ->setCellValue('C'.$row, $items->sbuname)
+								  ->setCellValue('D'.$row, $items->areaname)
+								  ->setCellValue('E'.$row, "'".$items->customercode)
+								  ->setCellValue('F'.$row, $items->customername)
+								  ->setCellValue('G'.$row, $items->streamid)
+								  ->setCellValue('H'.$row, $items->createdate)
+								  ->setCellValue('I'.$row, $itemsx->pressure)
+								  ->setCellValue('J'.$row, $itemsx->temperature)
+								  ->setCellValue('K'.$row, $itemsx->uncorrectedstart)
+								  ->setCellValue('L'.$row, $itemsx->uncorrectedend)
+								  ->setCellValue('M'.$row, $itemsx->correctedstart)
+								  ->setCellValue('N'.$row, $itemsx->correctedend)
+								  ->setCellValue('O'.$row, $itemsx->co2)
+								  ->setCellValue('P'.$row, $itemsx->n2)
+								  ->setCellValue('Q'.$row, $itemsx->sg)
+								  ->setCellValue('R'.$row, $itemsx->volcorrected)
+								  ->setCellValue('S'.$row, $itemsx->conversion_factor)
+								  ->setCellValue('T'.$row, $itemsx->description)
+								  ->setCellValue('U'.$row, date('Y-m-d H:i:s'))
+								  ->setCellValue('V'.$row, $items->kategori)
+								  ->setCellValue('W'.$row, $fieldsval)
+								  ->setCellValue('X'.$row, $items->keterangan);
+				
+				$this->b_model->insert_data('reject_info', $datainfo);
+				
+				
+				
+				// $this->b_model->insert_data('penyaluran_amr_daily', $datanya);
+				//$this->b_model->update_all('penyaluran_amr_daily', $upfilt , $dataapp);			
+				// delete data di table asal //
+				// $this->b_model->delete_all('temp_amr_bridge_daily', $delfilt);	
+				array_push($setun, $datanya);
+				$n++;
+			}
+			
+			$this->b_model->update_all('taxation', $codewhere_tax, $data_tax);
+			
+		}
+		
+		$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+		$file = "".$topath."Reject_Data_Taksasi". $sial. ".xls";
+		$objWriter->save($file);
+		
+		$this->send_emailmultiaddress($to, $subject, $pesan, $file);
+		delete_files( $topath );
+		$dadum['success'] = true;
+		$dadum['data'] = $setun;	
+	    echo json_encode($dadum);	    
+	}
+	
+	public function loadrejectcategory() 
+	{	   
+		$this->load->model('b_model');
+		$filter = $this->input->get('filter', TRUE) > '' ? $this->input->get('filter', TRUE) : array();
+		
+		array_push($filter);
+		
+		$limit = $this->input->get('limit', TRUE) > '' ? $this->input->get('limit', TRUE) : 150;
+	    $offset = $this->input->get('start', TRUE);
+	    
+	    $sorts = json_decode($this->input->get('sort', TRUE));
+	    if ($sorts) {
+		    foreach ($sorts as $sort) {
+		        $orders[] = $sort->property.' '.$sort->direction;
+		    }
+		    $order_by = implode(', ', $orders);
+	    } else {
+	    	$order_by = 'id asc';
+	    }		
+		$total_entries = $this->b_model->count_all_data('mst_reject_category', $filter);
+		$entries = $this->b_model->get_all_data('mst_reject_category', $filter , $limit, $offset, $order_by);
+		
+	    $data['success'] = true;	
+		$data['total'] = $total_entries;		
+	    $data['data'] = $entries;
+	     
+	    extjs_output($data);
+		
+	}
+	
+	public function detailpengukuran()
+	{
+		$this->load->model('b_model');
+	    $filter = $this->input->get('filter', TRUE) > ''? $this->input->get('filter', TRUE) : array();		
+		
+		$startt = $this->input->get('pstart',true) > '' ? whereTofilter('tanggal', $this->input->get('pstart',true) , 'date' , 'gt') : '' ;
+		$endd = $this->input->get('pend',true) > '' ? whereTofilter('tanggal', $this->input->get('pend',true) , 'date' , 'lt') : '' ;
+		$idrefpelanggan 	= $this->input->get('idrefpelanggan',true) > '' ? whereTofilter('id_pel', $this->input->get('idrefpelanggan',true) , 'string' , '') : '' ;		
+			
+		
+		array_push($filter, $startt,  $endd,$idrefpelanggan);
+		//var_dump($filter); 		
+		
+		$limit = $this->input->get('limit', TRUE) > '' ? $this->input->get('limit', TRUE) : 1000;
+	    $offset = $this->input->get('start', TRUE);
+	    
+	    $sorts = json_decode($this->input->get('sort', TRUE));
+	    if ($sorts) {
+		    foreach ($sorts as $sort) {
+		        $orders[] = $sort->property.' '.$sort->direction;
+		    }
+		    $order_by = implode(', ', $orders);
+	    } else {
+	    	$order_by = 'tanggal desc';
+	    }		
+
+	    $total_entries 	= $this->b_model->count_all_data('v_taxationpengukuran', $filter);
+		$entries 	= $this->b_model->get_all_data('v_taxationpengukuran', $filter , $limit, $offset, $order_by);		
+		
+	    $data['success'] = true;
+	    $data['total'] = $total_entries;
+	    $data['data'] = $entries;
+		
+	    // vd::dump($data); 
+	    extjs_output($data);
+		
+	}
+	
+	public function rebatchamr()	
+	{		
+		$start 		 = $this->input->post('startt',true);
+		$end 		 = $this->input->post('endd',true);
+		$area  		 = $this->input->post('area',true);
+		$startTime   = strtotime($start);
+		$endTime 	 = strtotime($end);
+		$kemarin 	 = date("Y-m-d", time() - 86400);
+		$kemarinlusa = date("Y-m-d", time() - 172800);
+		$startt = $start > '' ? $start : $kemarinlusa;
+		$endd 	= $end > '' ? $end : $kemarin;
+		$out = array();
+		echo 'success';
+		exec('C:\\xampp\\htdocs\\sipgem\\exec\\rebatchtaksasi.bat '.$area. ' '. $startt. ' '. $endd.'' ,$out, $exitcode);	
+	}
+
+
+} 

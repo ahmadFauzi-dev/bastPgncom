@@ -1,0 +1,115 @@
+function apps(name, iconCls) {
+   
+    var formareavalidasi = Ext.create('monitoring.view.formareavalidasi');
+	var msclass = Ext.create('master.global.geteventmenu'); 
+	var tiketnumber = msclass.getticket();
+	//var gridareavalidasi = Ext.create('monitoring.view.gridareavalidasi');
+	//var gridareavalidasidetail = Ext.create('monitoring.view.gridareavalidasidetail');
+	
+	var tabPanel = Ext.getCmp('contentcenter');
+		tabPanel.items.each(function(c){
+			if (c.title != 'Home') {
+				tabPanel.remove(c);
+			}
+		});
+		
+	var d = new Date();
+	month = '' + (d.getMonth() + 1);
+	day = '' + d.getDate();
+	year = d.getFullYear();
+	
+	if	(parseInt(month) < 10)
+	{
+		month = '0' + (d.getMonth() + 1);
+	}
+	if (parseInt(d.getDate()) < 10) 
+	{
+		day = '0' + d.getDate();
+	}
+	
+	var tanggal_awal = year+'-'+month+'- 01';
+	var tanggal_akhir = msclass.formatDate(Date());	
+    var items = tabPanel.items.items;
+    var exist = false;
+    if (!exist) {
+		tabPanel.add({
+            title: name,
+            id: '99',
+            xtype: 'panel',
+            iconCls: iconCls,
+            closable: true,
+            layout: 'border',
+            // overflowY	: 'scroll',
+            defaults: {
+                collapsible: true,
+                split: true,
+                //bodyStyle: 'padding:5px'
+            },
+            // bodyPadding: '5 5 0',
+            items: [{
+                xtype: 'panel',
+                title: 'Form Search',
+                // flex: 1,
+				id  : 'searchareavalidasi',
+                region: 'west',
+                // layout 		: 'fit',
+                bodyStyle: 'padding:5px',
+                width	: 250,
+                // margins	: '10',
+                items: formareavalidasi
+                //items			: []
+            }, {
+                xtype: 'tabpanel',
+                flex: 3,
+				id : 'tabgridareavalidasi',
+                collapsible: false,	
+                region: 'center',
+				activeTab	: 0,				
+				fit		: true,		
+				items	: [{
+					xtype	: 'panel',
+					title  : 'Validasi Area',
+					frame: true,	
+					iconCls 	: 'application_view_gallery',
+					layout		: 'fit',
+					id 			: 'panelprovisionalvalidasi',
+					defaults: {
+						collapsible: true,
+						split: true,
+						//bodyStyle: 'padding:5px'
+					},
+					autoScroll	: true,
+					layout: 'anchor',
+					height	: 1000,
+					items	: [
+					{
+						xtype: 'tableauviz',
+						title	: 'Monitoring validasi Area',
+						height	: 1000,
+						id		: 'tableauviz',
+						flex	: 1,
+						vizUrl	: "http://192.168.104.167:8000/trusted/"+tiketnumber+"/#/views/Book2/Dashboard2?startdate="+tanggal_awal+"&endate="+tanggal_akhir+"&:refresh=yes"
+						
+					}
+					/*,
+					{
+					
+						xtype : 'panel',					
+						autoScroll : true,
+						region : 'south',
+						frame	: true,
+						border	: false,					
+						title : 'Monitoring Detail Validasi Area',					
+						layout: 'fit',					
+						flex: 3,
+						items : gridareavalidasidetail
+					
+					}*/]
+				}]				
+                // items: [ gridareavalidasi ]
+            }]
+        });
+        tabPanel.setActiveTab('99');
+    }
+	console.log("http://192.168.104.167:8000/trusted/"+tiketnumber+"/#/views/Book2/Dashboard2?refresh=yes&startdate="+tanggal_awal+"&endate="+tanggal_akhir+"")
+}

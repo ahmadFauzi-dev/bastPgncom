@@ -1,0 +1,121 @@
+Ext.define('analisa.view.logapprovalamr' ,{
+		extend: 'Ext.form.Panel',
+		// alias : 'widget.formvalidamr',
+		initComponent: function() {	
+			
+			Init.storeSBU.load();
+			Init.storeArea.load();
+			
+			Ext.apply(this, {
+				frame		: false,
+				border		: false,
+				layout		: 'form',
+				frame  		: false,
+				method		: 'POST',
+				// url			: base_url+'admin/findamr',
+				bodyPadding: '5 5 0',
+				fieldDefaults: {
+					labelAlign: 'left',
+					anchor: '60%'
+				},
+				id			: 'logformkel',
+				items		: 
+				[			
+						
+					{
+						xtype		: 'datefield',
+						fieldLabel	: 'Start Date',
+						name		: 'startt',
+						// margins		: '0 0 0 5',
+						// labelWidth	: 150,
+						format		: 'Y-m-d',
+						//flex	: 1
+					},
+					{
+						xtype			: 'datefield',
+						// margins			: '0 0 0 5',
+						name			: 'endd',
+						//flex			: 2,
+						// labelWidth		: 150,
+						fieldLabel		: 'End Date',
+						format			: 'Y-m-d',
+		
+					},					
+					{
+						xtype		: 'combobox',
+						fieldLabel	: 'RD',						
+						name		: 'sbu',
+						displayField: 'description',
+						valueField: 'description',
+						queryMode: 'local',									
+						store: Init.storeSBU,
+						listeners : {
+							select: function(combo) 
+							{
+								 var values = combo.getValue(),
+								 record = combo.findRecordByValue(values);
+								console.log(record.data.rowid);
+								 Init.storeArea.reload({ params : { sbu : record.data.rowid }});
+								
+							 }
+						 }
+
+						
+					},
+					{
+						xtype		: 'combobox',
+						fieldLabel	: 'Area',						
+						name		: 'area',
+						displayField: 'namearea',
+						valueField: 'namearea',
+						queryMode: 'local',									
+						store: Init.storeArea
+					},
+					{
+						xtype		: 'textfield',
+						fieldLabel	: 'ID Pelanggan',
+						name		: 'id_pel',
+						// disabled	: true
+					},
+					{
+						xtype		: 'textfield',
+						fieldLabel	: 'Nama Pelanggan',
+						name		: 'namapel',
+						// disabled	: true
+					}					
+				],
+				buttons		: [{
+							text	: 'Search',
+							iconCls : 'magnifier',
+							handler	: function()
+							{
+								// Ext.getCmp('searchformkel').collapse();
+								var findform = this.up('form').getForm();
+								var oksparams = findform.getValues();
+								var storekelamr = Ext.getCmp('gridHistoryPenyaluran').getStore();
+								storekelamr.getProxy().extraParams = {
+									startt : oksparams.startt,
+									endd : oksparams.endd,
+									sbu : oksparams.sbu,
+									area : oksparams.area,
+									id_pel : oksparams.id_pel,
+									namapel : oksparams.namapel									
+									};
+								storekelamr.load({method: 'POST'});			
+								
+							}
+						},
+						{
+							text	: 'Reset',
+							iconCls : 'arrow_refresh',
+							handler	: function()
+							{
+								this.up('form').getForm().reset();
+							}
+						}
+				]
+		});
+
+		this.callParent(arguments);
+	}
+	});

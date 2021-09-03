@@ -1,0 +1,189 @@
+Ext.define('analisa.nonamr.view.gridkelnonamr' ,{
+	extend: 'Ext.grid.Panel',
+	initComponent	: function()
+	{
+		var required = '<span style="color:red;font-weight:bold" data-qtip="Required">*</span>',
+		win;
+		
+		function showWindowForm() {
+        if (!win) {
+            var form = Ext.widget('form', {
+                layout: {
+                    type: 'vbox',
+                    align: 'stretch'
+                },
+                border: false,
+                bodyPadding: 10,
+
+                fieldDefaults: {
+                    // labelAlign: 'top',
+                    labelWidth: 90,
+                    labelStyle: 'font-weight:bold'
+                },
+                items: [{
+                    xtype: 'datefield',
+                    fieldLabel: 'Start Date',
+                    afterLabelTextTpl: required,
+                    format	: 'Y-m-d',
+					name : 'startt',
+                    allowBlank: false
+                }, {
+                    xtype: 'datefield',
+                    fieldLabel: 'End Date',
+                    afterLabelTextTpl: required,
+                    format	: 'Y-m-d',
+					name : 'endd',
+                    allowBlank: false
+                }, {
+					afterLabelTextTpl: required,
+					allowBlank: false,
+					xtype		: 'combobox',
+					fieldLabel	: 'Area',						
+					name		: 'area',
+					displayField: 'namearea',
+					valueField: 'reffcd',
+					queryMode: 'local',									
+					store: Init.storeArea						
+                }],
+
+                buttons: [{
+                    text: 'Cancel',
+                    handler: function() {
+                        this.up('form').getForm().reset();
+                        this.up('window').hide();
+                    }
+                }, {
+                    text: 'Submit',
+                    handler: function() {                        
+						if (this.up('form').getForm().isValid()) {							
+							this.up('form').getForm().submit(
+							{
+								clientValidation	: true,				
+								url					: base_url+'analisa/nonamr/rebatch'
+								
+								// success: function(form, action) {
+									// var result = action.result;
+									// win.hide();
+									// console.log(result);
+								// },
+								// failure: function(form, action) {
+									// switch (action.failureType) {
+										// case Ext.form.action.Action.CLIENT_INVALID:
+										// Ext.Msg.alert('Failure', 'Form fields may not be submitted with invalid values');
+										// break;
+										// case Ext.form.action.Action.CONNECT_FAILURE:
+										// Ext.Msg.alert('Failure', 'Ajax communication failed');
+										// break;
+										// case Ext.form.action.Action.SERVER_INVALID:
+										// Ext.Msg.alert('Failure', action.result.msg);
+									// }
+								// }
+							});						
+							
+                        };
+						Ext.Msg.alert('Success', 'Rebatch Berjalan pada Background, Proses ETL Rebatch 30 Menit!!');
+						win.hide();
+                    }
+                }]
+            });
+					win = Ext.widget('window', {
+					title: 'Rebatch Data Non AMR',
+					closeAction: 'hide',
+					width: 330,
+					height: 180,
+					minWidth: 200,
+					minHeight: 100,
+					layout: 'fit',
+					resizable: true,
+					modal: true,
+					items: form,
+					defaultFocus: 'Startt Date'
+				});
+			}
+			win.show();
+		}
+		
+		var d = new Date();
+		var m = (d.getMonth()+1).toString();
+		if (m.length < 2 ) { m = '0'+m;}
+		var f = d.getFullYear()+'-'+m+'-'+d.getDate();	
+		
+		var queryy = " getkelengkapan_nonamr('', '', '"+f+"', '"+f+"', '', '', '1,2', '', '', '2') ";
+		var msclass 	 = Ext.create('master.global.geteventmenu');
+		var event 		 = 	Ext.decode(msclass.getevent(Init.idmenu));
+		var kelnonamrmodel = msclass.getmodel(queryy);
+		var columnss 	 = msclass.getcolumn(queryy);		
+		var filter 		 = [];	
+		var n = 7;
+		
+		
+		columnss[2].hidden = true;
+		columnss[3].hidden = true;
+		columnss[4].text = 'RD';
+		columnss[7].text = 'CRM Total';		
+		columnss[5].summaryType = 'count';
+		columnss[5].summaryRenderer =  function(value, meta, rec) {
+						meta.style = "font-weight: bold;font-size: 13px;";						
+						return 'Total '
+					};
+					
+		columnss[6].hidden = true;
+		
+		for (i = 7; i < columnss.length; i++) { 
+		columnss[i].summaryType = 'sum';
+		columnss[i].summaryRenderer = function(value, meta, rec) {
+						meta.style = "font-weight: bold;font-size: 13px;";						
+						return value
+					};		
+		}						
+		
+		var storeGridkelnonamr = msclass.getstore(kelnonamrmodel,queryy, filter);
+		
+		storeGridkelnonamr.load();
+		
+		Ext.apply(this, {
+			store	: storeGridkelnonamr,
+			columnLines: true, 
+			id		: 'gridKelnonamr',	
+			features: [{								
+				ftype: 'summary'
+			}],
+			dockedItems: [					
+				{
+					xtype: 'pagingtoolbar',
+					dock: 'bottom',
+					store: storeGridkelnonamr,
+					displayInfo: true,
+					plugins : [Ext.create('Ext.ux.PagingToolbarResizer')]
+				},
+				{
+					xtype: 'toolbar',
+					items: [{
+						iconCls	: 'arrow_refresh',
+						// hidden	: event.p_rebatch,						
+						text	: 'Rebatch',
+						handler	: showWindowForm						
+					}]
+				}],			
+			columns		: columnss,
+			viewConfig : {
+				listeners : {				
+					refresh: function(dataview) {
+						Ext.each(dataview.panel.columns, function(column) {
+							if (column.autoSizeColumn === true)
+								column.autoSize();
+							})
+					},
+					cellclick : function(view, cell, cellIndex, record, row, rowIndex, e){
+						var recom = record.data;
+						var clickedDataIndex = view.panel.headerCt.getHeaderAtIndex(cellIndex).dataIndex;
+						var clickedColumnName = view.panel.headerCt.getHeaderAtIndex(cellIndex).text;
+						console.log(clickedColumnName + ' || ' + clickedDataIndex );
+					}				
+				}									
+			}
+			
+		});
+		this.callParent(arguments);
+	}
+})

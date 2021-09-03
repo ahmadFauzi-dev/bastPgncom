@@ -1,0 +1,54 @@
+function apps(name, iconCls) {
+     
+    var formreportamr = Ext.create('analisa.view.formreportamr');
+    var gridreportamr = Ext.create('analisa.view.gridreportamr');	
+	
+    var tabPanel = Ext.getCmp('contentcenter');
+	tabPanel.items.each(function(c){
+		if (c.title != 'Home') {
+			tabPanel.remove(c);
+		}
+	});
+    var items = tabPanel.items.items;
+    var exist = false;
+    if (!exist) {
+		tabPanel.add({
+            title: name,
+            id: '9',
+            xtype: 'panel',
+            iconCls: iconCls,
+            closable: true,
+            layout: 'border',
+            // overflowY	: 'scroll',
+            defaults: {
+                collapsible: true,
+                split: true,
+                //bodyStyle: 'padding:5px'
+            },
+            // bodyPadding: '5 5 0',
+            items: [{
+                xtype: 'panel',
+                title: 'Form Search',
+                flex: 1,
+				id  : 'searchreportform',
+                region: 'west',
+                // layout 		: 'fit',
+                bodyStyle: 'padding:5px',
+                //width			: 600,
+                // margins		: '10',
+                items: formreportamr
+                //items			: []
+            }, {
+                xtype: 'tabpanel',
+                flex: 3,
+				id : 'TabAsikAjaLagi',
+                collapsible: false,	
+                region: 'center',
+				activeTab	: 0,				
+				fit		: true,							
+                items: [ gridreportamr ]
+            }]
+        });
+        tabPanel.setActiveTab('9');
+    }
+}

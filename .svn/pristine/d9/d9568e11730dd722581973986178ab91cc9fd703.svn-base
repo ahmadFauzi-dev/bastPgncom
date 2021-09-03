@@ -1,0 +1,49 @@
+function apps(name, iconCls) {
+	
+    var pageId = Init.idmenu;
+	var form_addsuratmasuk = Ext.create('simpel.surat_masuk.form_addsuratmasuk');
+	
+	
+	var tabPanel = Ext.getCmp('contentcenter');
+	tabPanel.items.each(function(c){
+		if (c.title != 'Home') {
+			tabPanel.remove(c);
+		}
+	});   
+    var exist = false;
+    if (!exist) {
+		tabPanel.add({
+            title: name,
+            id: 'addsuratmasuk',
+            xtype		: 'panel',
+            autoScroll: true,
+			iconCls		: iconCls,
+            closable	: true,
+			frame 		: true,
+            layout		: 'border',
+			autoWidth: true,
+            defaults: {
+                collapsible: false,
+                split: true
+            },
+            items		: 
+			[{
+					xtype	: 'fieldcontainer',
+					region	: 'north',
+					//flex	: 2,
+					//width:400,
+					//layout	: 'fit',
+					//align: 'stretch', */
+					//id:'searchlistkaryawan',
+					//collapsible: true,
+					collapsed :false,
+					title	: 'Konsep Surat Masuk External',
+					items : form_addsuratmasuk	
+			}]	
+			
+        });
+       Ext.getCmp('form_addsuratmasuk').getForm().reset();
+		tabPanel.setActiveTab('addsuratmasuk');
+	}
+	
+}
