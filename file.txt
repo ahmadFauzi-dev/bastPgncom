@@ -1,5 +1,0 @@
-
-Folder: \
-TaskName                                 Next Run Time          Status         
-======================================== ====================== ===============
-2-Info Tagihan Bulan tgl 6 (RT & PK)     8/6/2015 2:37:00 PM    Ready          
