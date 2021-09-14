@@ -1,0 +1,794 @@
+/*
+	var tb = 'tb_role_type';
+	var me = this;
+	
+	var gRow = -1;
+	Ext.define('Country',{
+		extend	: 'Ext.data.Model',
+		fields	: ['station','tgl_pengukuran','ket'
+				,
+				{
+					name : 'idx_jampengukuran_id',
+					type : 'Number'
+				},
+				{
+					name : 'mmscfd',
+					type : 'Number'
+				},
+				{
+					name	: 'totalizer_mmbtu',
+					type	: 'Number'
+				},
+				{
+					name 	: 'totalizer_mscf',
+					type	: 'Number'
+				},
+				{
+					name	: 'totalizer_energy',
+					type	: 'Number'
+				},
+				{
+					name	: 'totalizer_volume',
+					type	: 'Number'
+				},
+				{
+					name 	: 'tekanan_in_psig',
+					type	: 'Number'
+				},
+				{
+					name	: 'tekanan_out_psig',
+					type	: 'Number'
+				},
+				{
+					name	: 'temp_f',
+					type	: 'Number'
+				},
+				{
+					name	: 'GHV',
+					type	: 'Number'
+				}]
+	});
+	function getMessageerror(a,b,c,d,f,g,h)
+	{
+		var error_code = 0;
+		var message = "complete";
+		//if (a == 0 || b == 0 || c == 0 || d == 0 || e == 0 || f == 0 || g == 0 || h == 0) 
+		if(a == 0)
+		{
+			error_code = 1;
+			
+		}else
+		{
+			return "complete";
+		}
+		switch (error_code)
+		{
+			case 1:
+			message = "Periksa kembali kelengkapan data";
+		}
+		return message;
+	}
+	function getColor(a)
+	{
+		var error_code = 0;
+		if(a == 0)
+		{
+			error_code = 1;
+		}else 
+		{
+			error_code = 0;
+		}
+		return error_code;
+	}
+	 var countryStore = Ext.create('Ext.data.Store', {
+        model	: 'Country',
+		 listeners: {
+		    
+		  load: function(store,records) {
+			   
+			  var rowRec =  Ext.create('countryStore',{});
+			  this.add(rowRec);
+			  me.storeInitialCount = records.length;
+		  }
+		}
+    });
+	
+	countryStore.add({
+		station : 'Bekasi Power'
+	});
+	*/
+	
+	
+	
+	
+	/*
+	var gridMenu = Ext.create('Ext.menu.Menu',{
+		id: 'menuGrid',
+		items	: [{
+			text	: 'View Details',
+			handler	: function()
+			{
+				 var rec = gridDaily.getSelectionModel().getSelection()[0];
+				 console.log(rec.data);
+				 var storeGridDetails = Ext.create('Ext.data.Store',{
+					fields	: ['id','desc','stat'],
+					data	: [
+						{id:'A-0001',desc:'Kelengkapan Data',stat:'success'},
+						{id:'A-0002',desc:'Redudant 2 data sebelumnya (Volume & Energy )',stat:'success'},
+						{id:'A-0003',desc:'Jika nilai DP = 0, Maka nilai net volume = 0  dan energy = 0',stat:'success'},
+						{id:'A-0004',desc:'Temperature flowing di range 15 – 35 oC dan Pressure Flowing',stat:'success'},
+						{id:'A-0005',desc:'Ada penambahan volume (FlowRate)  dan energy (Energi), tapi totalizer volume dan energy tidak berubah, Di bandingankan dengan totalizer_formula_manual',stat:'success'},
+						{id:'A-0006',desc:'Tidak ada perubahan di Pb  dan  Tb',stat:'success'},
+						{id:'A-0007',desc:'Selisih pressure outlet PCV dengan Pressure flowing, tidak boleh lebih dari 5% ',stat:'success'},
+						{id:'A-0008',desc:'Jumlah pemakaian hourly = daily',stat:'success'},
+						//{id:'A-0009',desc:'Jumlah pemakaian hourly = daily'}	
+						{id:'A-0010',desc:'Hanya satu stream yang dipakai, untuk kondisi maintenance mode',stat:'error'}	,
+						{id:'A-0011',desc:'Meter bermasalah (dengan membandingkan  frofile temperatur dan  flowratenya )',stat:'warnig'},
+						{id:'A-0012',desc:'Pemakaian  flowrate daily drop, terhadap  range volume kontrak daily',stat:'success'},	
+						{id:'A-0013',desc:'Pemakaian  flowrate daily drop, terhadap  range volume kontrak daily',stat:'success'}	
+					]
+				});
+				var gridDetails = Ext.create('Ext.grid.Panel',{
+					id			: 'idgridMengetahui',
+					store 		: storeGridDetails,
+					frame		: true,
+					layout		: 'fit',
+					height		: 200,
+					autoScroll	: true,
+					title		: 'Details',
+					columns		: [Ext.create('Ext.grid.RowNumberer'),
+					{
+							dataIndex	: 'stat',
+							flex		: 1,
+							renderer : function(value, metaData, record, rowIdx, colIdx, store, view){
+								
+								//metaData.tdAttr= 'data-qtip="'+message+'"';
+								var color = '';
+								if(record.get('stat') == "success")
+								{
+									 color = base_url+'asset/ico/green_indicator.ico';
+								}else if(record.get('stat') == "warnig")
+								{
+									 color = base_url+'asset/ico/yellow_indicator.ico';
+								}else
+								{
+									color = base_url+'asset/ico/red_indicator.ico';
+								}
+								return '<div><img src='+color+' width="20px" height="20px"></div>';
+								
+							}
+					},
+					{
+						text		: 'id',
+						flex		: 1,
+						dataIndex	: 'id'
+					},
+					{
+						text		: 'Deskripsi',
+						flex		: 3,
+						dataIndex	: 'desc'
+						//xtype		: 'desc'
+					}]
+				});
+				
+				var winGD = Ext.widget('window',{
+					width: 600,
+					height	: 400,
+					layout: 'border',
+					autoScroll:true,
+					id		: "winNotifikasi",
+					//layout: 'fit',
+					resizable: true,
+					modal: true,
+					layout: 'fit',
+					margins: '5 0 0 5',
+					bodyPadding	: 5,
+					items		: gridDetails
+				});
+				winGD.show();
+			}
+		},
+		{
+			text	: 'View Hourly'
+		},
+		{
+			text	: 'View Snapshot'
+		},
+		{
+			text	: 'Show Graph',
+			handler	: function()
+			{
+				Ext.define('modelchartDaily',{
+				extend	: 'Ext.data.Model',
+					fields	: [
+					{
+						name	: 'volume'
+						//type	: 'float'
+					},
+					{
+						name	: 'energy'
+						//type	: 'float'
+					},'tanggals','min','max']
+				});
+				
+				var storeChartDaily = Ext.create('Ext.data.JsonStore',{
+				model	: 'modelchartDaily',
+				storeId	: 'storeChartDaily',
+				proxy	: {
+					type: 'ajax',
+						url: base_url+'admin/listChartDaily',
+						reader: {
+						type: 'json',
+						root: 'data'
+					}
+				}
+			});
+				storeChartDaily.reload();
+				var chartDaily	= Ext.create('Ext.chart.Chart',{
+				style: 'background:#fff',
+				animate: true,
+				store: storeChartDaily,
+				shadow: true,
+				theme: 'Category1',
+				legend: {
+					position: 'right'
+				},
+				axes: [{
+					type: 'Numeric',
+					minimum: 0,
+					position: 'left',
+					fields: ['volume', 'energy','min','max'],
+					title: 'Volume (MMSCFD)',
+					minorTickSteps: 1,
+					grid: {
+						odd: {
+							opacity: 1,
+							fill: '#ddd',
+							stroke: '#bbb',
+							'stroke-width': 0.5
+						}
+					}
+				}, {
+					type: 'Category',
+					position: 'bottom',
+					itemSpacing	: 0.5,
+					visible	: true,
+					labelFont	: '6x Helvetica',
+					label: {
+					rotate: {
+					  degrees: -40
+					}
+					},
+					fields: ['tanggals'],
+					title: 'Tanggal'
+				}],
+				series	: [{
+					type: 'line',
+					highlight: {
+						size: 31,
+						radius: 31
+					},
+					axis: 'left',
+					xField: 'tanggals',
+					yField: 'volume',
+					tips	: 
+					{
+						trackMouse : true,
+						renderer	: function(storeItem,item)
+						{
+							 //this.setTitle(storeItem.data.success);
+							 this.update(' Tanggal : '+storeItem.data.tanggals+' <br />Volume : '+storeItem.data.volume+' MMSCFD <br /> Energy '+storeItem.data.energy+' (BBTUD)');	
+							//alert("OKOKOKOOK");
+						}
+					},
+					markerConfig: {
+						type: 'cross',
+						size: 2,
+						radius: 2,
+						'stroke-width': 0
+						}   
+					},
+					{
+						type: 'line',
+					highlight: {
+						size: 31,
+						radius: 31
+					},
+					axis: 'left',
+					xField: 'tanggals',
+					yField: 'min',
+					markerConfig: {
+						type: 'cross',
+						size: 2,
+						radius: 2,
+						'stroke-width': 0
+						}   
+					},
+					{
+						type: 'line',
+					highlight: {
+						size: 31,
+						radius: 31
+					},
+					axis: 'left',
+					xField: 'tanggals',
+					yField: 'max',
+					markerConfig: {
+						type: 'cross',
+						size: 2,
+						radius: 2,
+						'stroke-width': 0
+						}   
+					}]
+				});
+				var winDaily = Ext.widget('window',{
+					width: 1200,
+					height	: 400,
+					layout: 'border',
+					autoScroll:true,
+					id		: "winNotifikasi",
+					//layout: 'fit',
+					resizable: true,
+					modal: true,
+					layout: 'fit',
+					margins: '5 0 0 5',
+					bodyPadding	: 5,
+					items		: chartDaily
+				});
+				winDaily.show();
+			}
+		}]
+	});
+	
+	*/
+	
+	/*
+	var grid = Ext.create('Ext.grid.Panel', {
+        store: countryStore,
+        stateful: true,
+		margins		: '10',
+		id		: 'grid-pnl',
+		plugins		: [
+		  Ext.create('Ext.grid.plugin.RowEditing', {
+		  clicksToEdit: 2
+		})],
+        //stateId: 'stateGrid',
+        columns: [
+            {
+				text		: 'Is Aktif',
+				dataIndex	: 'isaktif',
+				xtype		: 'checkcolumn'
+			},
+			{
+                text     : 'station',
+                flex     : 1,
+                sortable : false,
+                dataIndex: 'station'
+            },
+            {
+                text     : 'tgl_pengukuran',
+                flex     : 1,
+                sortable : false,
+                dataIndex: 'tgl_pengukuran',
+                //renderer : link
+            },
+			{
+				text	: 'Jam Pengukuran',
+				dataIndex	: 'idx_jampengukuran_id'
+			},
+			{
+				text	: 'Volume',
+				dataIndex	: 'mmscfd',
+				editor		: {
+					xtype: 'textfield',
+					name :'mmscfd'
+				},
+				renderer : function(value, metaData, record, rowIdx, colIdx, store, view){
+                    var message = getColor(record.get('mmscfd'));
+					
+					var color = '#E96565';
+					if(message == 0)
+					{
+						color = '#0CF892';
+					}else
+					{
+						color = '#E96565';
+					}
+					return '<div style="background-color:'+color+';color:#FCF8F8">'+value+'</div>';
+					
+                }
+			},
+			{
+				text	: 'Energy BBTUD',
+				dataIndex	: 'totalizer_mmbtu',
+				editor		: {
+					xtype: 'textfield',
+					name :'totalizer_mmbtu'
+				},
+				renderer : function(value, metaData, record, rowIdx, colIdx, store, view){
+                    var message = getColor(record.get('totalizer_mmbtu'));
+					
+					var color = '#E96565';
+					if(message == 0)
+					{
+						color = '#0CF892';
+					}else
+					{
+						color = '#E96565';
+					}
+					return '<div style="background-color:'+color+';color:#FCF8F8">'+value+'</div>';
+					
+                }
+				
+			},
+			{
+				text	: 'Totalizer Volume (MMSCF)',
+				dataIndex : 'totalizer_mscf',
+				editor		: {
+					xtype	: 'textfield',
+					name 	:'totalizer_mscf'
+				},
+				renderer : function(value, metaData, record, rowIdx, colIdx, store, view){
+                    var message = getColor(record.get('totalizer_mscf'));
+					
+					var color = '#E96565';
+					if(message == 0)
+					{
+						color = '#0CF892';
+					}else
+					{
+						color = '#E96565';
+					}
+					return '<div style="background-color:'+color+';color:#FCF8F8">'+value+'</div>';
+					
+                }
+			},
+			{
+				text	: 'Totalizer Energy(BBTU)',
+				dataIndex	: 'totalizer_energy',
+				editor		: {
+					xtype	: 'textfield',
+					name 	:'totalizer_energy'
+				},
+				renderer : function(value, metaData, record, rowIdx, colIdx, store, view){
+                    var message = getColor(record.get('totalizer_energy'));
+					
+					var color = '#E96565';
+					if(message == 0)
+					{
+						color = '#0CF892';
+					}else
+					{
+						color = '#E96565';
+					}
+					return '<div style="background-color:'+color+';color:#FCF8F8">'+value+'</div>';
+					
+                }
+			},
+			{
+				text	: 'GHV (BTU/SCF)',
+				dataIndex	: 'GHV',
+				editor		: {
+					xtype: 'textfield',
+					name :'GHV'
+				},
+				renderer : function(value, metaData, record, rowIdx, colIdx, store, view){
+                    var message = getColor(record.get('GHV'));
+					
+					var color = '#E96565';
+					if(message == 0)
+					{
+						color = '#0CF892';
+					}else
+					{
+						color = '#E96565';
+					}
+					return '<div style="background-color:'+color+';color:#FCF8F8">'+value+'</div>';
+					
+                }
+			},
+			{
+				text	: 'Tekanan IN (PSIG)',
+				dataIndex	: 'tekanan_in_psig',
+				editor		: {
+					xtype: 'textfield',
+					name :'tekanan_in_psig'
+				},
+				renderer : function(value, metaData, record, rowIdx, colIdx, store, view){
+                    var message = getColor(record.get('tekanan_in_psig'));
+					
+					var color = '#E96565';
+					if(message == 0)
+					{
+						color = '#0CF892';
+					}else
+					{
+						color = '#E96565';
+					}
+					return '<div style="background-color:'+color+';color:#FCF8F8">'+value+'</div>';
+					
+                }
+			},
+			{
+				text	: 'Tekanan OUT (PSIG)',
+				dataIndex : 'tekanan_out_psig',
+				editor		: {
+					xtype: 'textfield',
+					name :'tekanan_out_psig'
+				},
+				renderer : function(value, metaData, record, rowIdx, colIdx, store, view){
+                    var message = getColor(record.get('tekanan_out_psig'));
+					
+					var color = '#E96565';
+					if(message == 0)
+					{
+						color = '#0CF892';
+					}else
+					{
+						color = '#E96565';
+					}
+					return '<div style="background-color:'+color+';color:#FCF8F8">'+value+'</div>';
+					
+                }
+			},
+			{
+				text	: 'Temp. (F)',
+				dataIndex : 'temp_f',
+				editor		: {
+					xtype: 'textfield',
+					name :'temp_f'
+				},
+				renderer : function(value, metaData, record, rowIdx, colIdx, store, view){
+                    var message = getColor(record.get('temp_f'));
+					
+					var color = '#E96565';
+					if(message == 0)
+					{
+						color = '#0CF892';
+					}else
+					{
+						color = '#E96565';
+					}
+					return '<div style="background-color:'+color+';color:#FCF8F8">'+value+'</div>';
+					
+                }
+			},
+			{
+				text	: 'Keterangan',
+				dataIndex : 'ket',
+				flex	: 1,
+				renderer : function(value, metaData, record, rowIdx, colIdx, store, view){
+                    var message = getMessageerror(record.get('mmscfd'),record.get('totalizer_mmbtu'),record.get('totalizer_mscf'),record.get('totalizer_energy'),record.get('GHV'),record.get('tekanan_in_psig'),record.get('tekanan_out_psig'),record.get('temp_f'));
+					//return getMessageerror(record.get('mmscfd'),record.get('totalizer_mmbtu'),record.get('totalizer_mscf'),record.get('totalizer_energy')
+					//,record.get('GHV'),record.get('tekanan_in_psig'),record.get('tekanan_out_psig'),record.get('temp_f'));
+					//metaData.css  = 'background-color: #9fc;';
+					metaData.tdAttr= 'data-qtip="'+message+'"';
+					var color = '#E96565';
+					if(message == "complete")
+					{
+						color = '#0CF892';
+					}else
+					{
+						color = '#E96565';
+					}
+					return '<div style="background-color:'+color+';color:#FCF8F8">'+message+'</div>';
+					
+                }
+			}
+        ],
+		listeners: {
+	    	
+	    	cellclick: function(grid, td, cellIndex,record,tr,rowIndex) {
+	    		gRow = rowIndex;
+	    	},
+	    		
+    		viewready: function( grid ) {
+    			var map = new Ext.KeyMap(grid.getEl(), 
+	    			[{
+		    			key: "c",
+		    			ctrl:true,
+		    			fn: function(keyCode, e) {
+		    				
+			    			var recs = grid.getSelectionModel().getSelection();
+			    			
+			    			if (recs && recs.length != 0) {
+			    				
+				    			var clipText = grid.getCsvDataFromRecs(recs);
+				    			
+				    			var ta = document.createElement('textarea');
+				    			
+				    			ta.id = 'cliparea';
+				    			ta.style.position = 'absolute';
+				    			ta.style.left = '-1000px';
+				    			ta.style.top = '-1000px';
+				    			ta.value = clipText;
+				    			document.body.appendChild(ta);
+				    			document.designMode = 'off';
+				    			
+				    			ta.focus();
+				    			ta.select();
+				    			
+				    			setTimeout(function(){
+				    			
+				    					document.body.removeChild(ta);
+			
+				    			}, 100);
+			    			}
+		    			}
+	    			},
+	    			{
+    				
+	    			key: "v",
+	    			ctrl:true,
+	    			fn: function() {
+	    				
+		    			var ta = document.createElement('textarea');
+		    			ta.id = 'cliparea';
+		    			
+		    			ta.style.position = 'absolute';
+		    			ta.style.left = '-1000px';
+		    			ta.style.top = '-1000px';
+		    			ta.value = '';
+		    			
+		    			document.body.appendChild(ta);
+		    			document.designMode = 'off';
+		    			
+		    			setTimeout(function(){
+		    				
+		    				Ext.getCmp('grid-pnl').getRecsFromCsv(grid, ta);
+		    			}, 100);
+		    			
+		    			ta.focus();
+		    			ta.select();
+		    		}
+    			}]);
+
+    		}
+	    		
+	    },
+	    
+	    
+	    getCsvDataFromRecs: function(records) {
+
+	    	var clipText = '';
+
+	    	var currRow = countryStore.find('id',records[0].data.id);
+
+	    	for (var i=0; i<records.length; i++) {
+	    	
+		    	var index = countryStore.find('id',records[i].data.id);
+		    	
+		    	var r = index;
+		    	
+		    	var rec = records[i];
+		    	var cv = this.initialConfig.columns;
+		    	
+			    	for(var j=0; j < cv.length;j++) {
+			    		
+			    		
+				    		var val = rec.data[cv[j].dataIndex];
+				    		
+				    		if (r === currRow) {
+				    			
+				    				clipText = clipText.concat(val,"\t");
+				    			
+				    		} else {
+				    			
+				    			currRow = r;
+				    			
+				    			clipText = clipText.concat("\n", val, "\t");
+				    			
+				    		}
+			    	}
+	
+		    	}
+	
+		    	return clipText;
+
+	    },
+
+    	getRecsFromCsv: function(grid, ta) {
+
+	    	document.body.removeChild(ta);
+
+	    	var del = '';
+
+	    	if (ta.value.indexOf("\r\n")) {
+
+	    		del = "\r\n";
+
+	    	} else if (ta.value.indexOf("\n")) {
+
+	    		del = "\n"
+
+	    	}
+
+	    	var rows = ta.value.split("\n");
+			
+	    	for (var i=0; i<rows.length; i++) {
+
+		    	var cols = rows[i].split("\t");
+				
+				countryStore.add({
+					station : cols[i]
+				});
+		    	var columns = grid.initialConfig.columns;
+	
+		    	if (cols.length > columns.length)
+	
+		    		cols = cols.slice(0, columns.length-1)
+		
+		    	if (gRow === -1 ) {
+	
+		    		Ext.Msg.alert('Select a cell before pasting and try again!');
+	
+		    		return;
+	
+		    	}
+	
+		    	var cfg = {};
+	
+		    	var tmpRec = countryStore.getAt(gRow);
+	
+		    	var existing = false;
+	
+		    	if ( tmpRec ) {
+	
+			    	cfg = tmpRec.data;
+		
+			    	existing = true;
+	
+		    	}
+	
+		    	var l = cols.length;
+		    	
+		    	if ( cols.length > columns.length )
+	
+		    		l = columns.length;
+	
+		    	for (var j=0; j<l; j++) {
+	
+			    	if (cols[j] === "") {
+		
+			    		return;
+		
+			    	}
+			    	
+			    	cfg[columns[j].dataIndex] = cols[j];
+		    	}
+
+		    	//storeInitialCount++;
+		    	
+		    	cfg['id'] = i;
+				
+		    	var tmpRow = gRow;
+	
+		    	grid.getSelectionModel().clearSelections(true);
+	
+		    	var tmpRec = Ext.create('Country',cfg);
+	
+		    	if (existing)
+	
+		    	countryStore.removeAt(tmpRow);
+			
+				countryStore.removeAt(tmpRow);
+				countryStore.insert(tmpRow, tmpRec);
+	
+		    	gRow = ++tmpRow;
+	
+	    	}
+
+	    	if (gRow === countryStore.getCount()) {
+
+		    	var RowRec = Ext.create('Country',{});
+	
+		    	countryStore.add(RowRec);
+
+	    	}
+
+	    	gRow = 0;
+
+	    }	
+    });
+	
+	*/
